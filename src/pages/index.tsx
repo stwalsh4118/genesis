@@ -23,14 +23,7 @@ const Home: NextPage = () => {
     session ? void redirectIfSession() : void null;
   }, [session]);
 
-  return (
-    <>
-      <div className="flex min-h-screen bg-sage-100">
-        {/* sidebar */}
-        <div className="flex w-[30%] min-w-[20rem] flex-col bg-sage-300"></div>
-      </div>
-    </>
-  );
+  return <></>;
 };
 
 export default Home;
