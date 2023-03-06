@@ -1,7 +1,7 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SignInSidebar } from "./auth/SignInSidebar";
 import { Sidebar } from "./Sidebar";
 
@@ -10,11 +10,12 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const [loaded, setLoaded] = useState(false);
   const router = useRouter();
 
   const redirectToHome = async () => {
-    if (!session) {
+    if (status === "unauthenticated") {
       await router.push("/");
     }
   };
@@ -22,6 +23,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   useEffect(() => {
     console.log(session);
     session ? void null : void redirectToHome();
+
+    setInterval(() => {
+      setLoaded(true);
+    }, 100);
   }, [session]);
 
   return (
@@ -34,10 +39,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="flex h-full min-h-screen w-full bg-sage-100">
         <div
           className={`flex w-[30%] min-w-[20rem] bg-sage-300 transition-["width"] duration-500  ${
-            session ? "w-[20rem]" : "w-[30%]"
+            loaded ? "w-[20rem]" : "w-[30%]"
           }`}
         >
-          {session ? <Sidebar></Sidebar> : <SignInSidebar></SignInSidebar>}
+          {status !== "unauthenticated" ? (
+            <Sidebar loaded={loaded}></Sidebar>
+          ) : (
+            <SignInSidebar></SignInSidebar>
+          )}
         </div>
 
         {children}
