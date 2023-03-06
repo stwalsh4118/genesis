@@ -23,7 +23,18 @@ const Home: NextPage = () => {
     session ? void redirectIfSession() : void null;
   }, [session]);
 
-  return <></>;
+  return (
+    <>
+      <div className="relative flex-1">
+        <Image
+          src="/home.jpg"
+          alt="guy with books"
+          fill
+          style={{ objectFit: "cover" }}
+        ></Image>
+      </div>
+    </>
+  );
 };
 
 export default Home;

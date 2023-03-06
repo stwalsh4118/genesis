@@ -2,6 +2,8 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { SignInSidebar } from "./auth/SignInSidebar";
+import { Sidebar } from "./Sidebar";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -30,16 +32,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex h-full min-h-screen w-full bg-sage-100">
-        <div className="flex w-[30%] min-w-[20rem] flex-col items-center justify-between bg-sage-300 py-8">
-          {/* sign in form */}
-          <div className="text-4xl text-sage-800">MyBrary</div>
-          <button
-            className="rounded-lg bg-sage-700 p-4 text-sage-100"
-            onClick={session ? () => void signOut() : () => void signIn()}
-          >
-            {session ? "Sign Out" : "Sign In"}
-          </button>
+        <div
+          className={`flex w-[30%] min-w-[20rem] bg-sage-300 transition-["width"] duration-500  ${
+            session ? "w-[20rem]" : "w-[30%]"
+          }`}
+        >
+          {session ? <Sidebar></Sidebar> : <SignInSidebar></SignInSidebar>}
         </div>
+
         {children}
       </div>
     </>
