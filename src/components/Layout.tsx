@@ -23,9 +23,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   useEffect(() => {
     console.log(session);
     session ? void null : void redirectToHome();
-
+    console.log(status);
     setInterval(() => {
       setLoaded(true);
+      // console.log("loaded");
     }, 100);
   }, [session]);
 
@@ -38,8 +39,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       </Head>
       <div className="flex h-full min-h-screen w-full bg-sage-100">
         <div
-          className={`flex w-[30%] min-w-[20rem] bg-sage-300 transition-["width"] duration-500  ${
-            loaded ? "w-[20rem]" : "w-[30%]"
+          className={`flex min-w-[10rem] border-r border-sage-700 bg-sage-300 transition-["width"] duration-500  ${
+            loaded && status === "authenticated" ? "w-[16rem]" : "w-[30%]"
           }`}
         >
           {status !== "unauthenticated" ? (
