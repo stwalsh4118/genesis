@@ -20,5 +20,14 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "covers.openlibrary.org",
+        pathname: "/b/id/**",
+      },
+    ],
+  },
 };
 export default config;
