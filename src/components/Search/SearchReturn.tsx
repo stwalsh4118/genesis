@@ -25,7 +25,11 @@ export const SearchReturn: React.FC<SearchReturnProps> = ({ book }) => {
       <div className="flex grow basis-[33%] flex-col items-center justify-between">
         <div className="text-lg underline">{book.title}</div>
         <div className="text-md text-sage-800/50">
-          {"authors" in book ? book.authors[0]?.name : book.author_name[0]}
+          {"authors" in book
+            ? book.authors[0]?.name
+            : book.author_name
+            ? book.author_name[0]
+            : "No Author"}
         </div>
       </div>
       {/* right */}
@@ -33,7 +37,9 @@ export const SearchReturn: React.FC<SearchReturnProps> = ({ book }) => {
         <div className="">
           {"number_of_pages" in book
             ? book.number_of_pages
-            : book.number_of_pages_median}{" "}
+            : book.number_of_pages_median
+            ? book.number_of_pages_median
+            : "Unknown"}{" "}
           <span className="text-sage-800/70">Pages</span>
         </div>
         <div className="flex flex-col">
