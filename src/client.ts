@@ -51,7 +51,7 @@ export const getBooks = async (searchType: "isbn" | "title", input: string) => {
 
     return book ? book : null;
   } else {
-    const { data } = await axios.get<Book[]>(
+    const { data } = await axios.get<BookSearchResult>(
       `https://openlibrary.org/search.json?title=${input}`
     );
 
@@ -59,35 +59,3 @@ export const getBooks = async (searchType: "isbn" | "title", input: string) => {
     return data;
   }
 };
-
-// export const getBookByISBN = async (isbn: string) => {
-//   interface Response {
-//     [key: string]: object;
-//   }
-//   const data = await fetch(
-//     `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`
-//   )
-//     .then((res) => res.text())
-//     .then((data) => {
-//       if (data) {
-//         return Object.keys(JSON.parse(data) as object).length > 0
-//           ? (Object.assign(
-//               {},
-//               (JSON.parse(data) as Response)[`ISBN:${isbn}`]
-//             ) as Book)
-//           : null;
-//       }
-//     });
-//   return data;
-// };
-
-// export const getBookByTitle = async (title: string) => {
-//   const data = await fetch(`https://openlibrary.org/search.json?title=${title}`)
-//     .then((res) => res.text())
-//     .then((data) => {
-//       if (data) {
-//         return JSON.parse(data) as Book[];
-//       }
-//     });
-//   return data;
-// };

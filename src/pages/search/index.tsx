@@ -8,8 +8,8 @@ import { SearchReturn } from "@/components/Search/SearchReturn";
 const Search: React.FC = () => {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState("");
-  const [searchType, setSearchType] = useState<"isbn" | "title">("isbn");
-  const query = useQuery(["isbn", searchType, formData], () =>
+  const [searchType, setSearchType] = useState<"isbn" | "title">("title");
+  const query = useQuery(["search", searchType, formData], () =>
     getBooks(searchType, formData)
   );
 
@@ -18,7 +18,7 @@ const Search: React.FC = () => {
     const formData = new FormData(e.currentTarget);
     console.log(formData.get("search"));
     setFormData(formData.get("search") as string);
-    await queryClient.invalidateQueries([searchType, formData.get("search")]);
+    await queryClient.invalidateQueries(["search", formData.get("search")]);
   };
 
   useEffect(() => {
@@ -53,8 +53,8 @@ const Search: React.FC = () => {
               <div className="mb-4 flex max-h-[calc(100vh-8rem)] w-full flex-col divide-y divide-sage-400 overflow-scroll rounded-sm bg-sage-300 p-2">
                 {/* search result component */}
                 {query.data ? (
-                  Array.isArray(query.data) ? (
-                    query.data.map((book) => (
+                  "docs" in query.data ? (
+                    query.data.docs.map((book) => (
                       <SearchReturn key={book.title} book={book}></SearchReturn>
                     ))
                   ) : (
