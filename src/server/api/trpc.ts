@@ -20,6 +20,14 @@ import { type Session } from "next-auth";
 import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
 
+export type ZodShape<T> = {
+  // Require all the keys from T
+  [key in keyof T]-?: undefined extends T[key]
+    ? // When optional, require the type to be optional in zod
+      z.ZodOptionalType<z.ZodType<T[key]>>
+    : z.ZodType<T[key]>;
+};
+
 type CreateContextOptions = {
   session: Session | null;
 };
@@ -65,6 +73,7 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
  */
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
+import { z } from "zod";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,

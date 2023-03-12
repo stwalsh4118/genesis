@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider     = "mysql"
+  provider     = "postgresql"
   url          = env("DATABASE_URL")
-  relationMode = "prisma"
 }
 
 model Example {
@@ -48,6 +47,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  books         Book[]
 }
 
 model VerificationToken {
@@ -56,4 +56,19 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Book {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String
+  author    String
+  pages     Int
+  isbn10    String?
+  isbn13    String?
+  coverUrl  String?
+  read      Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
 }
