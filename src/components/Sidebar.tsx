@@ -32,7 +32,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ loaded }) => {
             >
               Book Search
             </div>
-            <div className="cursor-pointer hover:bg-sage-400">Collections</div>
+            <div
+              className="cursor-pointer hover:bg-sage-400"
+              onClick={() => void router.push("/collections")}
+            >
+              Collections
+            </div>
           </div>
           <div className="mx-2 flex flex-col gap-2 self-stretch p-4 text-center">
             <div className="cursor-pointer hover:bg-sage-400">
@@ -52,6 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ loaded }) => {
         >
           {session ? "Sign Out" : "Sign In"}
         </button>
+        {session?.user.email}
       </div>
     </>
   );

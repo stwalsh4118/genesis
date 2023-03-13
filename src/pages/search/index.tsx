@@ -5,7 +5,7 @@ import type { FormEvent } from "react";
 import { api } from "@/utils/api";
 
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
-import { SearchReturn } from "@/components/Search/SearchReturn";
+import { BookDisplay } from "@/components/BookDisplay/BookDisplay";
 
 const Search: React.FC = () => {
   const queryClient = useQueryClient();
@@ -86,20 +86,78 @@ const Search: React.FC = () => {
                       if (Array.isArray(query.data)) {
                         return query.data.map((book, index) => {
                           return (
-                            <SearchReturn
+                            <BookDisplay
                               key={index}
-                              book={book}
-                              onBookAdd={addBook}
-                            ></SearchReturn>
+                              leftSlot={
+                                <BookDisplay.Image
+                                  imageUrl={book.coverUrl ? book.coverUrl : ""}
+                                />
+                              }
+                              middleSlot={
+                                <div className="flex h-full flex-col justify-between text-center">
+                                  <BookDisplay.Title title={book.title} />
+                                  <BookDisplay.Author author={book.author} />
+                                </div>
+                              }
+                              rightSlot={
+                                <div className="flex h-full flex-col items-end justify-between">
+                                  <BookDisplay.Pages
+                                    pages={book.pages ? book.pages : 0}
+                                  />
+                                  <BookDisplay.AddBookButton
+                                    addBook={addBook}
+                                    book={book}
+                                  />
+                                  <div className="flex flex-col items-end">
+                                    <BookDisplay.ISBN10
+                                      isbn10={book.isbn10 ? book.isbn10 : ""}
+                                    />
+                                    <BookDisplay.ISBN13
+                                      isbn13={book.isbn13 ? book.isbn13 : ""}
+                                    />
+                                  </div>
+                                </div>
+                              }
+                            ></BookDisplay>
                           );
                         });
                       }
                       return (
-                        <SearchReturn
+                        <BookDisplay
                           key={query.data.title}
-                          book={query.data}
-                          onBookAdd={addBook}
-                        ></SearchReturn>
+                          leftSlot={
+                            <BookDisplay.Image
+                              imageUrl={
+                                query.data.coverUrl ? query.data.coverUrl : ""
+                              }
+                            />
+                          }
+                          middleSlot={
+                            <div className="flex flex-col justify-between">
+                              <BookDisplay.Title title={query.data.title} />
+                              <BookDisplay.Author author={query.data.author} />
+                            </div>
+                          }
+                          rightSlot={
+                            <div className="flex h-full flex-col items-end justify-between">
+                              <BookDisplay.Pages
+                                pages={query.data.pages ? query.data.pages : 0}
+                              />
+                              <div className="flex flex-col items-end">
+                                <BookDisplay.ISBN10
+                                  isbn10={
+                                    query.data.isbn10 ? query.data.isbn10 : ""
+                                  }
+                                />
+                                <BookDisplay.ISBN13
+                                  isbn13={
+                                    query.data.isbn13 ? query.data.isbn13 : ""
+                                  }
+                                />
+                              </div>
+                            </div>
+                          }
+                        ></BookDisplay>
                       );
                     }
                   })}

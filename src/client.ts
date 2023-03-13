@@ -12,10 +12,10 @@ import axios from "axios";
 export interface Book {
   title: string;
   author: string;
-  pages: number;
+  pages?: number;
   isbn10?: string;
   isbn13?: string;
-  coverUrl: string;
+  coverUrl?: string;
 }
 
 export interface BookResponse {
@@ -74,7 +74,9 @@ export const getBookByIsbn = async (isbn: string) => {
         ? bookResponseParsed.authors[0].name
         : ""
       : "";
-    book.pages = bookResponseParsed.number_of_pages;
+    book.pages = bookResponseParsed.number_of_pages
+      ? bookResponseParsed.number_of_pages
+      : 0;
     book.isbn10 = bookResponseParsed.identifiers.isbn_10[0];
     book.isbn13 = bookResponseParsed.identifiers.isbn_13[0];
     book.coverUrl = bookResponseParsed.cover.large;
@@ -93,7 +95,7 @@ export const getBookByTitle = async (title: string) => {
 
     book.title = doc.title;
     book.author = doc.author_name[0] ? doc.author_name[0] : "";
-    book.pages = doc.number_of_pages_median;
+    book.pages = doc.number_of_pages_median ? doc.number_of_pages_median : 0;
     book.isbn10 = doc.isbn ? doc.isbn.find((isbn) => isbn.length === 10) : "";
     book.isbn13 = doc.isbn ? doc.isbn.find((isbn) => isbn.length === 13) : "";
     book.coverUrl = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;

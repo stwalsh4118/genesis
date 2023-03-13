@@ -7,14 +7,14 @@ import type { Book } from "@/client";
 const bookShape: ZodShape<Book> = {
   title: z.string(),
   author: z.string(),
-  pages: z.number(),
+  pages: z.number().optional(),
   isbn10: z.string().optional(),
   isbn13: z.string().optional(),
-  coverUrl: z.string(),
+  coverUrl: z.string().optional(),
 };
 
 export const userBooksRouter = createTRPCRouter({
-  getBooks: protectedProcedure
+  getAllBooks: protectedProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ ctx, input }) => {
       const books = await ctx.prisma.user.findFirst({

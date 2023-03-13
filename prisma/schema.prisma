@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider     = "postgresql"
-  url          = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Example {
@@ -46,8 +46,9 @@ model User {
   emailVerified DateTime?
   image         String?
   accounts      Account[]
-  sessions      Session[]
   books         Book[]
+  sessions      Session[]
+  collections  Collection[]
 }
 
 model VerificationToken {
@@ -64,11 +65,28 @@ model Book {
   updatedAt DateTime @updatedAt
   title     String
   author    String
-  pages     Int
+  pages     Int?
   isbn10    String?
   isbn13    String?
   coverUrl  String?
   read      Boolean  @default(false)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collectionId String?
+  collection Collection? @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, title])
+  @@unique([collectionId, title])
+}
+
+model Collection {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  books     Book[]
+
+  @@unique([userId, name])
 }
