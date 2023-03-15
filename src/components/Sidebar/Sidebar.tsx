@@ -2,6 +2,8 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { BookOpenIcon } from "@heroicons/react/24/outline";
+import { SidebarHeader } from "./SidebarHeader";
 
 interface SidebarProps {
   loaded: boolean;
@@ -10,6 +12,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ loaded }) => {
   const { data: session, status } = useSession();
   const router = useRouter();
+
   return (
     <>
       <div className="flex h-full w-full flex-col items-center justify-between pb-8">
@@ -18,7 +21,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ loaded }) => {
             loaded ? "opacity-100" : "opacity-0"
           }`}
         >
-          <div className="self-stretch p-4 text-2xl">MyBrary</div>
+          <div className="flex w-full p-2">
+            <div
+              className={`${
+                router.asPath === "/dashboard" ? "translate-x-[4.55rem]" : ""
+              } w-full transition-transform duration-300`}
+            >
+              {router.asPath === "/dashboard" ? (
+                <div className="text-2xl text-sage-800">MyBrary</div>
+              ) : (
+                <>
+                  <SidebarHeader></SidebarHeader>
+                </>
+              )}
+            </div>
+          </div>
           <div className="mx-2 flex flex-col gap-2 self-stretch p-4 text-center">
             <div
               className="cursor-pointer hover:bg-sage-400"
