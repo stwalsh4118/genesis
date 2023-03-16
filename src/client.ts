@@ -1,14 +1,5 @@
 import axios from "axios";
 
-// export type Book = {
-//   title     String
-//   author    String
-//   pages     Int
-//   isbn10    String?
-//   isbn13    String?
-//   coverUrl  String?
-// }
-
 export interface Book {
   title: string;
   author: string;

@@ -14,7 +14,7 @@ const bookShape: ZodShape<Book> = {
 };
 
 export const userBooksRouter = createTRPCRouter({
-  getAllBooks: protectedProcedure
+  getBooks: protectedProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ ctx, input }) => {
       const books = await ctx.prisma.user.findFirst({
