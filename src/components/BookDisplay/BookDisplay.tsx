@@ -19,6 +19,7 @@ interface BookDisplayComponents {
   AddBookButton: React.FC<{
     addBook: UseTRPCMutationResult<any, any, any, any>;
     book: Book;
+    defaultCollectionId: string | undefined;
   }>;
 }
 
@@ -96,13 +97,17 @@ const BookDisplayISBN13: React.FC<{ isbn13: string }> = ({ isbn13 }) => {
 const BookDisplayAddButton: React.FC<{
   addBook: UseTRPCMutationResult<any, any, any, any>;
   book: Book;
-}> = ({ addBook, book }) => {
+  defaultCollectionId: string | undefined;
+}> = ({ addBook, book, defaultCollectionId }) => {
   return (
     <>
       <button
         className="rounded-sm bg-sage-800 p-1 text-sm text-sage-200"
         onClick={() => {
-          addBook.mutate(book);
+          addBook.mutate({
+            book: book,
+            collectionId: defaultCollectionId,
+          });
         }}
       >
         Add Book

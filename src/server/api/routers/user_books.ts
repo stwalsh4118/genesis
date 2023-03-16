@@ -30,7 +30,12 @@ export const userBooksRouter = createTRPCRouter({
     }),
 
   addBook: protectedProcedure
-    .input(z.object(bookShape))
+    .input(
+      z.object({
+        book: z.object(bookShape),
+        collectionId: z.string().optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const user = ctx.session.user;
       console.log(user);
@@ -38,12 +43,13 @@ export const userBooksRouter = createTRPCRouter({
       const userBook = await ctx.prisma.book.create({
         data: {
           userId: user.id,
-          title: input.title,
-          author: input.author,
-          pages: input.pages,
-          isbn10: input.isbn10,
-          isbn13: input.isbn13,
-          coverUrl: input.coverUrl,
+          collectionId: input.collectionId,
+          title: input.book.title,
+          author: input.book.author,
+          pages: input.book.pages,
+          isbn10: input.book.isbn10,
+          isbn13: input.book.isbn13,
+          coverUrl: input.book.coverUrl,
         },
       });
 

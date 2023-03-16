@@ -6,9 +6,11 @@ import { api } from "@/utils/api";
 
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { BookDisplay } from "@/components/BookDisplay/BookDisplay";
+import { useSession } from "next-auth/react";
 
 const Search: React.FC = () => {
   const queryClient = useQueryClient();
+  const { data: session } = useSession();
   const [formData, setFormData] = useState("");
   const [searchType, setSearchType] = useState<"isbn" | "title">("isbn");
   const query = useQueries({
@@ -26,6 +28,9 @@ const Search: React.FC = () => {
     ],
   });
   const addBook = api.user_books.addBook.useMutation();
+  const { data: collections } = api.user_collections.getCollections.useQuery({
+    userId: session?.user.id ? session.user.id : "",
+  });
 
   const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -107,6 +112,17 @@ const Search: React.FC = () => {
                                   <BookDisplay.AddBookButton
                                     addBook={addBook}
                                     book={book}
+                                    defaultCollectionId={
+                                      collections?.collections.find(
+                                        (collection) =>
+                                          collection.name === "All"
+                                      )?.id
+                                        ? collections.collections.find(
+                                            (collection) =>
+                                              collection.name === "All"
+                                          )?.id
+                                        : ""
+                                    }
                                   />
                                   <div className="flex flex-col items-end">
                                     <BookDisplay.ISBN10

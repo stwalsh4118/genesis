@@ -1,10 +1,14 @@
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BookOpenIcon } from "@heroicons/react/24/outline";
 import { BookDisplay } from "@/components/BookDisplay/BookDisplay";
+import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
 const Collections: React.FC = () => {
+  //state for storing which dropdown is open, use book id since it's unique
+  const [selectedDropdown, setSelectedDropdown] = useState("");
+
   const { data, status } = useSession();
   const { data: books } = api.user_books.getBooks.useQuery({
     userId: data?.user.id ? data.user.id : "",
@@ -14,31 +18,13 @@ const Collections: React.FC = () => {
   });
   const addCollection = api.user_collections.addCollection.useMutation();
 
-  const setDefaultCollections = () => {
-    collections
-      ? addCollection.mutate({
-          name: collections.collections
-            .filter((collection) =>
-              [
-                "All",
-                "Favorite",
-                "Read",
-                "Currently Reading",
-                "Want to Read",
-              ].includes(collection.name)
-            )
-            .map((collection) => collection.name),
-        })
-      : null;
+  const handleDropdownSelect = (id: string) => {
+    if (selectedDropdown === id) {
+      setSelectedDropdown("");
+    } else {
+      setSelectedDropdown(id);
+    }
   };
-
-  useEffect(() => {
-    console.log(books);
-  }, [books]);
-
-  useEffect(() => {
-    console.log(collections);
-  }, [collections]);
 
   return (
     <>
@@ -78,9 +64,23 @@ const Collections: React.FC = () => {
                     <BookDisplay
                       key={index}
                       leftSlot={
-                        <BookDisplay.Image
-                          imageUrl={book.coverUrl ? book.coverUrl : ""}
-                        />
+                        <div className="flex justify-between">
+                          <BookDisplay.Image
+                            imageUrl={book.coverUrl ? book.coverUrl : ""}
+                          />
+                          <div className="relative flex h-6 w-36 cursor-pointer select-none  bg-sage-400/50 text-sm text-sage-800 active:bg-sage-400/80">
+                            <div
+                              className="flex h-full w-full items-center justify-center"
+                              onClick={() => handleDropdownSelect(book.id)}
+                            >
+                              <div className="">Add to Collection</div>
+                              <ChevronDownIcon className="ml-2 h-4 w-4" />
+                            </div>
+                            {selectedDropdown === book.id ? (
+                              <div className="absolute top-6 h-[8.5rem] w-36 bg-red-500"></div>
+                            ) : null}
+                          </div>
+                        </div>
                       }
                       middleSlot={
                         <div className="flex h-full flex-col justify-between text-center">

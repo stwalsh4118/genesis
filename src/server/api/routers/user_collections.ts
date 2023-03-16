@@ -62,8 +62,6 @@ export const userCollectionsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const user = ctx.session.user;
-
       let data;
       if (typeof input.bookIds === "string") {
         data = {

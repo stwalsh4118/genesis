@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { SignInSidebar } from "./Sidebar/SignInSidebar";
 import { Sidebar } from "./Sidebar/Sidebar";
+import { api } from "@/utils/api";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,34 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { data: session, status } = useSession();
   const [loaded, setLoaded] = useState(false);
   const router = useRouter();
+
+  const { data: collections } = api.user_collections.getCollections.useQuery({
+    userId: session?.user.id ? session.user.id : "",
+  });
+  const addCollection = api.user_collections.addCollection.useMutation();
+
+  const setDefaultCollections = () => {
+    collections
+      ? addCollection.mutate({
+          name: collections.collections
+            .filter((collection) =>
+              [
+                "All",
+                "Favorite",
+                "Read",
+                "Currently Reading",
+                "Want to Read",
+              ].includes(collection.name)
+            )
+            .map((collection) => collection.name),
+        })
+      : null;
+  };
+
+  useEffect(() => {
+    console.log(collections);
+    setDefaultCollections();
+  }, [collections]);
 
   const redirectToHome = async () => {
     if (status === "unauthenticated") {
