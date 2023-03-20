@@ -1,20 +1,49 @@
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { RefObject } from "react";
 import { BookDisplay } from "@/components/BookDisplay/BookDisplay";
 import { ChevronDownIcon, TrashIcon } from "@heroicons/react/24/solid";
+import Fuse from "fuse.js";
+import type { Book } from "@prisma/client";
+
+function useOutsideAlerter(
+  ref: RefObject<HTMLDivElement>,
+  callback: () => void
+) {
+  useEffect(() => {
+    /**
+     * Alert if clicked on outside of element
+     */
+    function handleClickOutside(event: MouseEvent) {
+      if (!ref) return;
+      if (ref.current && !ref.current.contains(event.target as Node | null)) {
+        callback();
+      }
+    }
+    // Bind the event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      // Unbind the event listener on clean up
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [ref]);
+}
 
 const Collections: React.FC = () => {
   //state for storing which dropdown is open, use book id since it's unique
   const [selectedDropdown, setSelectedDropdown] = useState("");
   const [selectedCollection, setSelectedCollection] = useState("All");
+  const [searchResults, setSearchResults] = useState<Book[]>([]);
 
-  const { data, status } = useSession();
+  const options = {
+    includeScore: true,
+    keys: ["title", "author"],
+  };
 
-  const utils = api.useContext();
-  const { data: books } = api.user_books.getBooks.useQuery({
-    userId: data?.user.id ? data.user.id : "",
-  });
+  const { data } = useSession();
+  const dropdown = useRef<HTMLDivElement>(null);
+
   const { data: collections } = api.user_collections.getCollections.useQuery({
     userId: data?.user.id ? data.user.id : "",
   });
@@ -31,9 +60,15 @@ const Collections: React.FC = () => {
     }
   };
 
+  useOutsideAlerter(dropdown, () => setSelectedDropdown(""));
+
   useEffect(() => {
     console.log(collections);
   }, [collections]);
+
+  useEffect(() => {
+    console.log(searchResults);
+  }, [searchResults]);
 
   return (
     <>
@@ -63,6 +98,19 @@ const Collections: React.FC = () => {
               className="h-10 w-96 rounded-sm border border-sage-200/50 bg-sage-100/50 p-2 text-sage-800 shadow-inner outline-none placeholder:text-sage-800/50"
               autoComplete="off"
               placeholder="Search for books"
+              onChange={(e) => {
+                if (!collections) return;
+                const books = collections.collections.find(
+                  (collection) => collection.name === selectedCollection
+                )?.books;
+
+                if (!books) return;
+
+                const fuse = new Fuse(books, options);
+                const result = fuse.search(e.target.value);
+                const bookResults = result.map((book) => book.item);
+                setSearchResults(bookResults);
+              }}
             ></input>
           </div>
           {/* results area */}
@@ -71,101 +119,109 @@ const Collections: React.FC = () => {
               (collection) => collection.name === selectedCollection
             ) ? (
               <div className="flex h-full max-h-[calc(100vh-12rem)] w-full flex-col divide-y divide-sage-400 overflow-y-scroll rounded-sm bg-sage-300 pl-2">
-                {collections?.collections
-                  .find((collection) => collection.name === selectedCollection)!
-                  .books.map((book, index) => {
-                    return (
-                      <BookDisplay
-                        key={index}
-                        leftSlot={
-                          <div className="flex justify-between">
-                            <BookDisplay.Image
-                              imageUrl={book.coverUrl ? book.coverUrl : ""}
-                            />
-                            <div className="relative flex h-6 w-36 cursor-pointer select-none text-sm text-sage-800 ">
+                {(searchResults.length !== 0
+                  ? searchResults
+                  : collections?.collections.find(
+                      (collection) => collection.name === selectedCollection
+                    )!.books
+                ).map((book, index) => {
+                  return (
+                    <BookDisplay
+                      key={index}
+                      leftSlot={
+                        <div className="flex justify-between">
+                          <BookDisplay.Image
+                            imageUrl={book.coverUrl ? book.coverUrl : ""}
+                          />
+                          <div className="relative flex h-6 w-36 cursor-pointer select-none text-sm text-sage-800 ">
+                            <div
+                              className="flex h-full w-full items-center justify-center bg-sage-500/50 active:bg-sage-500/80"
+                              onClick={() => handleDropdownSelect(book.id)}
+                            >
+                              <div className="">Add to Collection</div>
+                              <ChevronDownIcon className="ml-2 h-4 w-4" />
+                            </div>
+                            {selectedDropdown === book.id ? (
                               <div
-                                className="flex h-full w-full items-center justify-center bg-sage-500/50 active:bg-sage-500/80"
-                                onClick={() => handleDropdownSelect(book.id)}
+                                ref={
+                                  selectedDropdown === book.id ? dropdown : null
+                                }
+                                className="absolute top-6 flex h-[8.5rem] w-full flex-col divide-y-[1px] divide-sage-500/80 rounded-b-sm bg-sage-400/50"
                               >
-                                <div className="">Add to Collection</div>
-                                <ChevronDownIcon className="ml-2 h-4 w-4" />
+                                {collections
+                                  ? collections.collections.map(
+                                      (collection) => {
+                                        return (
+                                          <div
+                                            key={collection.name}
+                                            className="button flex h-full w-full select-none items-center justify-center rounded-b-sm border-sage-800 px-2 text-sm text-sage-900 hover:bg-sage-400/30 active:bg-sage-400/80"
+                                            onClick={() => {
+                                              addBooksToCollection.mutate({
+                                                bookIds: book.id,
+                                                collectionId: collection.id,
+                                              });
+                                            }}
+                                          >
+                                            {collection.name}
+                                          </div>
+                                        );
+                                      }
+                                    )
+                                  : null}
                               </div>
-                              {selectedDropdown === book.id ? (
-                                <div className="absolute top-6 flex h-[8.5rem] w-full flex-col divide-y-[1px] divide-sage-500/80 rounded-b-sm bg-sage-400/50">
-                                  {collections
-                                    ? collections.collections.map(
-                                        (collection) => {
-                                          return (
-                                            <div
-                                              key={collection.name}
-                                              className="button flex h-full w-full select-none items-center justify-center rounded-b-sm border-sage-800 px-2 text-sm text-sage-900 hover:bg-sage-400/30 active:bg-sage-400/80"
-                                              onClick={() => {
-                                                addBooksToCollection.mutate({
-                                                  bookIds: book.id,
-                                                  collectionId: collection.id,
-                                                });
-                                              }}
-                                            >
-                                              {collection.name}
-                                            </div>
-                                          );
-                                        }
-                                      )
-                                    : null}
-                                </div>
-                              ) : null}
-                            </div>
+                            ) : null}
                           </div>
-                        }
-                        middleSlot={
-                          <div className="flex h-full flex-col justify-between text-center">
-                            <BookDisplay.Title title={book.title} />
-                            <BookDisplay.Author author={book.author} />
+                        </div>
+                      }
+                      middleSlot={
+                        <div className="flex h-full flex-col justify-between text-center">
+                          <BookDisplay.Title title={book.title} />
+                          <BookDisplay.Author author={book.author} />
+                        </div>
+                      }
+                      rightSlot={
+                        <div className="flex h-full flex-col items-end justify-between">
+                          <div className="flex w-full items-center justify-between">
+                            {selectedCollection !== "All" ? (
+                              <TrashIcon
+                                className="button h-6 w-6 text-red-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                                onClick={() => {
+                                  if (!selectedCollection) return;
+
+                                  const currentCollection =
+                                    collections?.collections.find(
+                                      (collection) =>
+                                        collection.name === selectedCollection
+                                    );
+
+                                  if (!currentCollection) return;
+
+                                  removeBooksFromCollection.mutate({
+                                    bookIds: book.id,
+                                    collectionId: currentCollection.id,
+                                  });
+                                }}
+                              ></TrashIcon>
+                            ) : (
+                              <div></div>
+                            )}
+                            <BookDisplay.Pages
+                              pages={book.pages ? book.pages : 0}
+                            />
                           </div>
-                        }
-                        rightSlot={
-                          <div className="flex h-full flex-col items-end justify-between">
-                            <div className="flex w-full items-center justify-between">
-                              {selectedCollection !== "All" ? (
-                                <TrashIcon
-                                  className="button h-6 w-6 text-red-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                                  onClick={() => {
-                                    if (!selectedCollection) return;
-
-                                    const currentCollection =
-                                      collections?.collections.find(
-                                        (collection) =>
-                                          collection.name === selectedCollection
-                                      );
-
-                                    if (!currentCollection) return;
-
-                                    removeBooksFromCollection.mutate({
-                                      bookIds: book.id,
-                                      collectionId: currentCollection.id,
-                                    });
-                                  }}
-                                ></TrashIcon>
-                              ) : (
-                                <div></div>
-                              )}
-                              <BookDisplay.Pages
-                                pages={book.pages ? book.pages : 0}
-                              />
-                            </div>
-                            <div className="flex flex-col items-end">
-                              <BookDisplay.ISBN10
-                                isbn10={book.isbn10 ? book.isbn10 : ""}
-                              />
-                              <BookDisplay.ISBN13
-                                isbn13={book.isbn13 ? book.isbn13 : ""}
-                              />
-                            </div>
+                          <div className="flex flex-col items-end">
+                            <BookDisplay.ISBN10
+                              isbn10={book.isbn10 ? book.isbn10 : ""}
+                            />
+                            <BookDisplay.ISBN13
+                              isbn13={book.isbn13 ? book.isbn13 : ""}
+                            />
                           </div>
-                        }
-                      ></BookDisplay>
-                    );
-                  })}
+                        </div>
+                      }
+                    ></BookDisplay>
+                  );
+                })}
               </div>
             ) : null}
           </div>
