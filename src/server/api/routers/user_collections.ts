@@ -88,4 +88,79 @@ export const userCollectionsRouter = createTRPCRouter({
 
       return userCollection;
     }),
+
+  removeBooksFromCollection: protectedProcedure
+    .input(
+      z.object({
+        collectionId: z.string(),
+        bookIds: z.union([z.string(), z.array(z.string())]),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      let data;
+      if (typeof input.bookIds === "string") {
+        const bookCollections = await ctx.prisma.book.findFirst({
+          where: {
+            id: input.bookIds,
+          },
+          select: {
+            collection: true,
+          },
+        });
+
+        if (!bookCollections) {
+          throw new Error("Cannot remove book from collection");
+        } else if (bookCollections.collection.length === 1) {
+          throw new Error("Cannot remove book from collection");
+        }
+
+        data = {
+          id: input.bookIds,
+        };
+      } else {
+        data = input.bookIds.map(async (bookId) => {
+          const bookCollections = await ctx.prisma.book.findFirst({
+            where: {
+              id: bookId,
+            },
+            select: {
+              collection: true,
+            },
+          });
+
+          if (!bookCollections) {
+            return {
+              id: undefined,
+            };
+          } else if (bookCollections.collection.length === 1) {
+            return {
+              id: undefined,
+            };
+          }
+          return {
+            id: bookId,
+          };
+        });
+
+        data = await Promise.all(data);
+        data = data.filter((book) => book.id !== undefined);
+
+        if (data.length === 0) {
+          throw new Error("Cannot remove books from collection");
+        }
+      }
+
+      const userCollection = await ctx.prisma.collection.update({
+        where: {
+          id: input.collectionId,
+        },
+        data: {
+          books: {
+            disconnect: data,
+          },
+        },
+      });
+
+      return userCollection;
+    }),
 });

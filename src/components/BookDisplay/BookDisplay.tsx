@@ -26,7 +26,7 @@ interface BookDisplayComponents {
 export const BookDisplay: React.FC<BookDisplayProps> &
   BookDisplayComponents = ({ leftSlot, middleSlot, rightSlot }) => {
   return (
-    <div className="flex h-[12rem] w-full justify-between rounded-sm bg-sage-200 p-4 text-sage-800">
+    <div className="group flex h-[12rem] w-full justify-between rounded-sm bg-sage-200 p-4 text-sage-800">
       {/* left */}
       <div className="grow basis-[33%]">{leftSlot}</div>
       {/* middle */}

@@ -2,7 +2,7 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { BookDisplay } from "@/components/BookDisplay/BookDisplay";
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { ChevronDownIcon, TrashIcon } from "@heroicons/react/24/solid";
 
 const Collections: React.FC = () => {
   //state for storing which dropdown is open, use book id since it's unique
@@ -20,6 +20,8 @@ const Collections: React.FC = () => {
   });
   const addBooksToCollection =
     api.user_collections.addBooksToCollection.useMutation();
+  const removeBooksFromCollection =
+    api.user_collections.removeBooksFromCollection.useMutation();
 
   const handleDropdownSelect = (id: string) => {
     if (selectedDropdown === id) {
@@ -123,9 +125,34 @@ const Collections: React.FC = () => {
                         }
                         rightSlot={
                           <div className="flex h-full flex-col items-end justify-between">
-                            <BookDisplay.Pages
-                              pages={book.pages ? book.pages : 0}
-                            />
+                            <div className="flex w-full items-center justify-between">
+                              {selectedCollection !== "All" ? (
+                                <TrashIcon
+                                  className="button h-6 w-6 text-red-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                                  onClick={() => {
+                                    if (!selectedCollection) return;
+
+                                    const currentCollection =
+                                      collections?.collections.find(
+                                        (collection) =>
+                                          collection.name === selectedCollection
+                                      );
+
+                                    if (!currentCollection) return;
+
+                                    removeBooksFromCollection.mutate({
+                                      bookIds: book.id,
+                                      collectionId: currentCollection.id,
+                                    });
+                                  }}
+                                ></TrashIcon>
+                              ) : (
+                                <div></div>
+                              )}
+                              <BookDisplay.Pages
+                                pages={book.pages ? book.pages : 0}
+                              />
+                            </div>
                             <div className="flex flex-col items-end">
                               <BookDisplay.ISBN10
                                 isbn10={book.isbn10 ? book.isbn10 : ""}

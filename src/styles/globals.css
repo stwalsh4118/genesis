@@ -28,6 +28,6 @@
   border: 3px solid var(--primary);
 }
 
-/* .button {
+.button {
   @apply select-none hover:cursor-pointer active:translate-y-[1px];
-} */
+}
