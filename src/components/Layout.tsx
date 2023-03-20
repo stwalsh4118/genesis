@@ -23,25 +23,22 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const setDefaultCollections = () => {
     collections
       ? addCollection.mutate({
-          name: collections.collections
-            .filter((collection) =>
-              [
-                "All",
-                "Favorite",
-                "Read",
-                "Currently Reading",
-                "Want to Read",
-              ].includes(collection.name)
-            )
-            .map((collection) => collection.name),
+          name: [
+            "All",
+            "Favorite",
+            "Read",
+            "Currently Reading",
+            "Want to Read",
+          ],
         })
       : null;
   };
 
   useEffect(() => {
     console.log(collections);
+    console.log("SETTING DEFAULT COLLECTIONS");
     setDefaultCollections();
-  }, [collections]);
+  }, []);
 
   const redirectToHome = async () => {
     if (status === "unauthenticated") {

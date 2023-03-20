@@ -33,23 +33,42 @@ export const userBooksRouter = createTRPCRouter({
     .input(
       z.object({
         book: z.object(bookShape),
-        collectionId: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const user = ctx.session.user;
       console.log(user);
 
+      const userCollections = await ctx.prisma.user.findFirst({
+        where: {
+          id: user.id,
+        },
+        select: {
+          collections: true,
+        },
+      });
+
+      let allCollection;
+      if (userCollections) {
+        allCollection = userCollections.collections.find(
+          (collection) => collection.name === "All"
+        );
+      }
+
       const userBook = await ctx.prisma.book.create({
         data: {
           userId: user.id,
-          collectionId: input.collectionId,
           title: input.book.title,
           author: input.book.author,
           pages: input.book.pages,
           isbn10: input.book.isbn10,
           isbn13: input.book.isbn13,
           coverUrl: input.book.coverUrl,
+          collection: {
+            connect: {
+              id: allCollection?.id,
+            },
+          },
         },
       });
 

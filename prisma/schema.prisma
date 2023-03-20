@@ -72,11 +72,9 @@ model Book {
   read      Boolean  @default(false)
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  collectionId String?
-  collection Collection? @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collection Collection[]
 
-  @@unique([userId, title])
-  @@unique([collectionId, title])
+  @@unique([userId, title, author])
 }
 
 model Collection {

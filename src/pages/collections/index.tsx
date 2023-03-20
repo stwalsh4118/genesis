@@ -1,22 +1,25 @@
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { BookOpenIcon } from "@heroicons/react/24/outline";
 import { BookDisplay } from "@/components/BookDisplay/BookDisplay";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 
 const Collections: React.FC = () => {
   //state for storing which dropdown is open, use book id since it's unique
   const [selectedDropdown, setSelectedDropdown] = useState("");
+  const [selectedCollection, setSelectedCollection] = useState("All");
 
   const { data, status } = useSession();
+
+  const utils = api.useContext();
   const { data: books } = api.user_books.getBooks.useQuery({
     userId: data?.user.id ? data.user.id : "",
   });
   const { data: collections } = api.user_collections.getCollections.useQuery({
     userId: data?.user.id ? data.user.id : "",
   });
-  const addCollection = api.user_collections.addCollection.useMutation();
+  const addBooksToCollection =
+    api.user_collections.addBooksToCollection.useMutation();
 
   const handleDropdownSelect = (id: string) => {
     if (selectedDropdown === id) {
@@ -25,6 +28,10 @@ const Collections: React.FC = () => {
       setSelectedDropdown(id);
     }
   };
+
+  useEffect(() => {
+    console.log(collections);
+  }, [collections]);
 
   return (
     <>
@@ -39,6 +46,7 @@ const Collections: React.FC = () => {
                     <div
                       key={collection.name}
                       className="button flex h-full w-fit min-w-[6rem] select-none items-center justify-center rounded-sm border-sage-800 bg-sage-400 px-2 text-sm text-sage-900 hover:bg-sage-400/50"
+                      onClick={() => setSelectedCollection(collection.name)}
                     >
                       {collection.name}
                     </div>
@@ -57,55 +65,80 @@ const Collections: React.FC = () => {
           </div>
           {/* results area */}
           <div className="h-full w-full p-4">
-            {books ? (
+            {collections?.collections.find(
+              (collection) => collection.name === selectedCollection
+            ) ? (
               <div className="flex h-full max-h-[calc(100vh-12rem)] w-full flex-col divide-y divide-sage-400 overflow-y-scroll rounded-sm bg-sage-300 pl-2">
-                {books.books.map((book, index) => {
-                  return (
-                    <BookDisplay
-                      key={index}
-                      leftSlot={
-                        <div className="flex justify-between">
-                          <BookDisplay.Image
-                            imageUrl={book.coverUrl ? book.coverUrl : ""}
-                          />
-                          <div className="relative flex h-6 w-36 cursor-pointer select-none  bg-sage-400/50 text-sm text-sage-800 active:bg-sage-400/80">
-                            <div
-                              className="flex h-full w-full items-center justify-center"
-                              onClick={() => handleDropdownSelect(book.id)}
-                            >
-                              <div className="">Add to Collection</div>
-                              <ChevronDownIcon className="ml-2 h-4 w-4" />
+                {collections?.collections
+                  .find((collection) => collection.name === selectedCollection)!
+                  .books.map((book, index) => {
+                    return (
+                      <BookDisplay
+                        key={index}
+                        leftSlot={
+                          <div className="flex justify-between">
+                            <BookDisplay.Image
+                              imageUrl={book.coverUrl ? book.coverUrl : ""}
+                            />
+                            <div className="relative flex h-6 w-36 cursor-pointer select-none text-sm text-sage-800 ">
+                              <div
+                                className="flex h-full w-full items-center justify-center bg-sage-500/50 active:bg-sage-500/80"
+                                onClick={() => handleDropdownSelect(book.id)}
+                              >
+                                <div className="">Add to Collection</div>
+                                <ChevronDownIcon className="ml-2 h-4 w-4" />
+                              </div>
+                              {selectedDropdown === book.id ? (
+                                <div className="absolute top-6 flex h-[8.5rem] w-full flex-col divide-y-[1px] divide-sage-500/80 rounded-b-sm bg-sage-400/50">
+                                  {collections
+                                    ? collections.collections.map(
+                                        (collection) => {
+                                          return (
+                                            <div
+                                              key={collection.name}
+                                              className="button flex h-full w-full select-none items-center justify-center rounded-b-sm border-sage-800 px-2 text-sm text-sage-900 hover:bg-sage-400/30 active:bg-sage-400/80"
+                                              onClick={() => {
+                                                addBooksToCollection.mutate({
+                                                  bookIds: book.id,
+                                                  collectionId: collection.id,
+                                                });
+                                              }}
+                                            >
+                                              {collection.name}
+                                            </div>
+                                          );
+                                        }
+                                      )
+                                    : null}
+                                </div>
+                              ) : null}
                             </div>
-                            {selectedDropdown === book.id ? (
-                              <div className="absolute top-6 h-[8.5rem] w-36 bg-red-500"></div>
-                            ) : null}
                           </div>
-                        </div>
-                      }
-                      middleSlot={
-                        <div className="flex h-full flex-col justify-between text-center">
-                          <BookDisplay.Title title={book.title} />
-                          <BookDisplay.Author author={book.author} />
-                        </div>
-                      }
-                      rightSlot={
-                        <div className="flex h-full flex-col items-end justify-between">
-                          <BookDisplay.Pages
-                            pages={book.pages ? book.pages : 0}
-                          />
-                          <div className="flex flex-col items-end">
-                            <BookDisplay.ISBN10
-                              isbn10={book.isbn10 ? book.isbn10 : ""}
-                            />
-                            <BookDisplay.ISBN13
-                              isbn13={book.isbn13 ? book.isbn13 : ""}
-                            />
+                        }
+                        middleSlot={
+                          <div className="flex h-full flex-col justify-between text-center">
+                            <BookDisplay.Title title={book.title} />
+                            <BookDisplay.Author author={book.author} />
                           </div>
-                        </div>
-                      }
-                    ></BookDisplay>
-                  );
-                })}
+                        }
+                        rightSlot={
+                          <div className="flex h-full flex-col items-end justify-between">
+                            <BookDisplay.Pages
+                              pages={book.pages ? book.pages : 0}
+                            />
+                            <div className="flex flex-col items-end">
+                              <BookDisplay.ISBN10
+                                isbn10={book.isbn10 ? book.isbn10 : ""}
+                              />
+                              <BookDisplay.ISBN13
+                                isbn13={book.isbn13 ? book.isbn13 : ""}
+                              />
+                            </div>
+                          </div>
+                        }
+                      ></BookDisplay>
+                    );
+                  })}
               </div>
             ) : null}
           </div>
