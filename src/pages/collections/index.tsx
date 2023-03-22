@@ -82,7 +82,14 @@ const Collections: React.FC = () => {
                   return (
                     <div
                       key={collection.name}
-                      className="button flex h-full w-fit min-w-[6rem] select-none items-center justify-center rounded-sm border-sage-800 bg-sage-400 px-2 text-sm text-sage-900 hover:bg-sage-400/50"
+                      className={
+                        `${
+                          selectedCollection === collection.name
+                            ? "bg-sage-400/60"
+                            : ""
+                        }` +
+                        " button flex h-full w-fit min-w-[6rem] select-none items-center justify-center rounded-sm border-sage-800 bg-sage-400 px-2 text-sm text-sage-900 hover:bg-sage-400/50"
+                      }
                       onClick={() => setSelectedCollection(collection.name)}
                     >
                       {collection.name}

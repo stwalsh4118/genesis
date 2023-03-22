@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { api } from "@/utils/api";
 
-import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import {
+  MagnifyingGlassIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/24/solid";
 import { BookDisplay } from "@/components/BookDisplay/BookDisplay";
 import { useSession } from "next-auth/react";
 
@@ -51,13 +54,6 @@ const Search: React.FC = () => {
   return (
     <>
       <div className="flex min-h-screen w-full justify-center">
-        <div
-          onClick={() => {
-            setSearchType(searchType === "isbn" ? "title" : "isbn");
-          }}
-        >
-          Switch
-        </div>
         {/* search wrapper */}
         <div className="flex h-full w-[70%] flex-col">
           {/* search bar */}
@@ -71,13 +67,17 @@ const Search: React.FC = () => {
             <form onSubmit={(e) => void handleSearch(e)}>
               <input
                 type="search"
-                placeholder={`Search by ${searchType}`}
+                placeholder="Search by"
                 className="my-4 h-14 w-full rounded-sm bg-sage-300 p-2 text-2xl text-sage-700 outline-none placeholder:text-sage-800/50 focus:outline-sage-600"
                 name="search"
                 id="search"
                 autoComplete="off"
               />
             </form>
+            <div className="button absolute top-0 left-0 my-7 ml-[7.2rem] flex h-8 w-fit items-center justify-center rounded-md border-[1px] border-sage-700/20 p-1 text-2xl text-sage-800/50 shadow-sm">
+              <div>title</div>
+              <ChevronDownIcon className="ml-[.1rem] h-[1.25rem] w-[1.25rem] text-sage-800/50"></ChevronDownIcon>
+            </div>
           </div>
           {/* search results */}
           <div className="w-full">
