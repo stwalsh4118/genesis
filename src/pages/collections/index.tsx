@@ -61,6 +61,11 @@ const Collections: React.FC = () => {
         toast.success("Book removed from collection");
       },
     });
+  const deleteBook = api.user_books.deleteBook.useMutation({
+    onSuccess: () => {
+      toast.success("Book deleted");
+    },
+  });
 
   const handleDropdownSelect = (id: string) => {
     if (selectedDropdown === id) {
@@ -110,7 +115,10 @@ const Collections: React.FC = () => {
           </div>
           {/* search area */}
           <div className="flex h-16 w-full items-center justify-between p-4">
-            <div className="h-10 w-52 rounded-sm border border-sage-200/50 bg-sage-100/50 shadow-inner"></div>
+            {/* tags */}
+            {/* <div className="h-10 w-52 rounded-sm border border-sage-200/50 bg-sage-100/50 shadow-inner"></div> */}
+            {/* placeholder */}
+            <div></div>
             <input
               className="h-10 w-96 rounded-sm border border-sage-200/50 bg-sage-100/50 p-2 text-sage-800 shadow-inner outline-none placeholder:text-sage-800/50"
               autoComplete="off"
@@ -200,29 +208,31 @@ const Collections: React.FC = () => {
                       rightSlot={
                         <div className="flex h-full flex-col items-end justify-between">
                           <div className="flex w-full items-center justify-between">
-                            {selectedCollection !== "All" ? (
+                            {
                               <TrashIcon
                                 className="button h-6 w-6 text-red-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                                 onClick={() => {
                                   if (!selectedCollection) return;
 
-                                  const currentCollection =
-                                    collections?.collections.find(
-                                      (collection) =>
-                                        collection.name === selectedCollection
-                                    );
+                                  if (selectedCollection !== "All") {
+                                    const currentCollection =
+                                      collections?.collections.find(
+                                        (collection) =>
+                                          collection.name === selectedCollection
+                                      );
 
-                                  if (!currentCollection) return;
+                                    if (!currentCollection) return;
 
-                                  removeBooksFromCollection.mutate({
-                                    bookIds: book.id,
-                                    collectionId: currentCollection.id,
-                                  });
+                                    removeBooksFromCollection.mutate({
+                                      bookIds: book.id,
+                                      collectionId: currentCollection.id,
+                                    });
+                                  } else {
+                                    deleteBook.mutate({ bookId: book.id });
+                                  }
                                 }}
                               ></TrashIcon>
-                            ) : (
-                              <div></div>
-                            )}
+                            }
                             <BookDisplay.Pages
                               pages={book.pages ? book.pages : 0}
                             />
