@@ -7,6 +7,8 @@ import { api } from "@/utils/api";
 import "@/styles/globals.css";
 import { Layout } from "@/components/Layout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +21,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <QueryClientProvider client={queryClient}>
         <Layout>
           <Component {...pageProps} />
+          <ToastContainer />
         </Layout>
       </QueryClientProvider>
     </SessionProvider>

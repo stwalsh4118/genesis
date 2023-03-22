@@ -3,6 +3,7 @@ import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { api } from "@/utils/api";
+import { toast } from "react-toastify";
 
 import {
   MagnifyingGlassIcon,
@@ -18,7 +19,7 @@ const Search: React.FC = () => {
   const [formData, setFormData] = useState("");
   const [searchDropdownActive, setSearchDropdownActive] = useState(false);
   const [searchType, setSearchType] = useState<"ISBN" | "Title" | "Author">(
-    "ISBN"
+    "Title"
   );
   const [searchQuery, setSearchQuery] = useState("");
   const dropdown = useRef(null);
@@ -29,16 +30,20 @@ const Search: React.FC = () => {
       {
         queryKey: ["isbn", formData],
         queryFn: () => getBookByIsbn(formData),
-        enabled: searchType === "ISBN",
+        enabled: searchType === "ISBN" && formData.length > 0,
       },
       {
         queryKey: ["title", formData],
         queryFn: () => getBookByTitle(formData),
-        enabled: searchType === "Title",
+        enabled: searchType === "Title" && formData.length > 0,
       },
     ],
   });
-  const addBook = api.user_books.addBook.useMutation();
+  const addBook = api.user_books.addBook.useMutation({
+    onSuccess: () => {
+      toast.success("Book added to your collection");
+    },
+  });
   const { data: collections } = api.user_collections.getCollections.useQuery({
     userId: session?.user.id ? session.user.id : "",
   });
@@ -66,8 +71,9 @@ const Search: React.FC = () => {
         <div className="flex h-full w-[70%] flex-col">
           {/* search bar */}
           <div className="relative w-full">
-            {!query?.every((query) => query.isFetching) &&
-            !query?.every((query) => query.isLoading) ? (
+            {(!query?.every((query) => query.isFetching) &&
+              !query?.every((query) => query.isLoading)) ||
+            formData.length === 0 ? (
               <MagnifyingGlassIcon className="absolute right-4 my-7 h-8 w-8 text-sage-700"></MagnifyingGlassIcon>
             ) : (
               <div className="absolute right-4 my-7 h-8 w-8 animate-spin rounded-full border-b-2 border-sage-700"></div>
@@ -214,6 +220,20 @@ const Search: React.FC = () => {
                             <div className="flex h-full flex-col items-end justify-between">
                               <BookDisplay.Pages
                                 pages={query.data.pages ? query.data.pages : 0}
+                              />
+                              <BookDisplay.AddBookButton
+                                addBook={addBook}
+                                book={query.data}
+                                defaultCollectionId={
+                                  collections?.collections.find(
+                                    (collection) => collection.name === "All"
+                                  )?.id
+                                    ? collections.collections.find(
+                                        (collection) =>
+                                          collection.name === "All"
+                                      )?.id
+                                    : ""
+                                }
                               />
                               <div className="flex flex-col items-end">
                                 <BookDisplay.ISBN10

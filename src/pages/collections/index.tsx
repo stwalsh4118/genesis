@@ -7,6 +7,8 @@ import { ChevronDownIcon, TrashIcon } from "@heroicons/react/24/solid";
 import Fuse from "fuse.js";
 import type { Book } from "@prisma/client";
 
+import { toast } from "react-toastify";
+
 export const useOutsideAlerter = (
   ref: RefObject<HTMLDivElement>,
   callback: () => void
@@ -48,9 +50,17 @@ const Collections: React.FC = () => {
     userId: data?.user.id ? data.user.id : "",
   });
   const addBooksToCollection =
-    api.user_collections.addBooksToCollection.useMutation();
+    api.user_collections.addBooksToCollection.useMutation({
+      onSuccess: () => {
+        toast.success("Book added to collection");
+      },
+    });
   const removeBooksFromCollection =
-    api.user_collections.removeBooksFromCollection.useMutation();
+    api.user_collections.removeBooksFromCollection.useMutation({
+      onSuccess: () => {
+        toast.success("Book removed from collection");
+      },
+    });
 
   const handleDropdownSelect = (id: string) => {
     if (selectedDropdown === id) {
@@ -167,6 +177,7 @@ const Collections: React.FC = () => {
                                                 bookIds: book.id,
                                                 collectionId: collection.id,
                                               });
+                                              setSelectedDropdown("");
                                             }}
                                           >
                                             {collection.name}
