@@ -7,10 +7,10 @@ import { ChevronDownIcon, TrashIcon } from "@heroicons/react/24/solid";
 import Fuse from "fuse.js";
 import type { Book } from "@prisma/client";
 
-function useOutsideAlerter(
+export const useOutsideAlerter = (
   ref: RefObject<HTMLDivElement>,
   callback: () => void
-) {
+) => {
   useEffect(() => {
     /**
      * Alert if clicked on outside of element
@@ -28,7 +28,7 @@ function useOutsideAlerter(
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [ref]);
-}
+};
 
 const Collections: React.FC = () => {
   //state for storing which dropdown is open, use book id since it's unique

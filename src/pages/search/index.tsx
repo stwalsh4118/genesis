@@ -1,6 +1,6 @@
 import { getBookByIsbn, getBookByTitle } from "@/client";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { api } from "@/utils/api";
 
@@ -10,23 +10,31 @@ import {
 } from "@heroicons/react/24/solid";
 import { BookDisplay } from "@/components/BookDisplay/BookDisplay";
 import { useSession } from "next-auth/react";
+import { useOutsideAlerter } from "../collections";
 
 const Search: React.FC = () => {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const [formData, setFormData] = useState("");
-  const [searchType, setSearchType] = useState<"isbn" | "title">("isbn");
+  const [searchDropdownActive, setSearchDropdownActive] = useState(false);
+  const [searchType, setSearchType] = useState<"ISBN" | "Title" | "Author">(
+    "ISBN"
+  );
+  const [searchQuery, setSearchQuery] = useState("");
+  const dropdown = useRef(null);
+  useOutsideAlerter(dropdown, () => setSearchDropdownActive(false));
+
   const query = useQueries({
     queries: [
       {
         queryKey: ["isbn", formData],
         queryFn: () => getBookByIsbn(formData),
-        enabled: searchType === "isbn",
+        enabled: searchType === "ISBN",
       },
       {
         queryKey: ["title", formData],
         queryFn: () => getBookByTitle(formData),
-        enabled: searchType === "title",
+        enabled: searchType === "Title",
       },
     ],
   });
@@ -72,12 +80,60 @@ const Search: React.FC = () => {
                 name="search"
                 id="search"
                 autoComplete="off"
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                }}
               />
             </form>
-            <div className="button absolute top-0 left-0 my-7 ml-[7.2rem] flex h-8 w-fit items-center justify-center rounded-md border-[1px] border-sage-700/20 p-1 text-2xl text-sage-800/50 shadow-sm">
-              <div>title</div>
-              <ChevronDownIcon className="ml-[.1rem] h-[1.25rem] w-[1.25rem] text-sage-800/50"></ChevronDownIcon>
-            </div>
+            {!searchQuery ? (
+              <div className="absolute top-0 left-0 my-7 ml-[7.2rem] flex h-8 w-fit items-center justify-center">
+                <div className="relative h-fit w-full">
+                  <div
+                    className="button flex h-full w-full items-center justify-center rounded-md border-[1px] border-sage-700/20 p-1 text-2xl text-sage-800/50 shadow-sm"
+                    onClick={() =>
+                      setSearchDropdownActive(!searchDropdownActive)
+                    }
+                  >
+                    <div>{searchType}</div>
+                    <ChevronDownIcon className="ml-[.1rem] h-[1.25rem] w-[1.25rem] text-sage-800/50"></ChevronDownIcon>
+                  </div>
+                  {searchDropdownActive ? (
+                    <div
+                      ref={dropdown}
+                      className="absolute mt-1 flex h-fit w-24 flex-col divide-y-[1px] divide-sage-600/40 border border-sage-500/50 bg-sage-400 px-1 text-sage-800 shadow-sm"
+                    >
+                      <div
+                        onClick={() => {
+                          setSearchType("Title");
+                          setSearchDropdownActive(false);
+                        }}
+                        className="button py-1 hover:bg-sage-500/50"
+                      >
+                        Title
+                      </div>
+                      <div
+                        onClick={() => {
+                          setSearchType("ISBN");
+                          setSearchDropdownActive(false);
+                        }}
+                        className="button py-1 hover:bg-sage-500/50"
+                      >
+                        ISBN
+                      </div>
+                      <div
+                        onClick={() => {
+                          setSearchType("Author");
+                          setSearchDropdownActive(false);
+                        }}
+                        className="button py-1 hover:bg-sage-500/50"
+                      >
+                        Author
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
           </div>
           {/* search results */}
           <div className="w-full">
