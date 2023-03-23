@@ -3,7 +3,11 @@ import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import { BookDisplay } from "@/components/BookDisplay/BookDisplay";
-import { ChevronDownIcon, TrashIcon } from "@heroicons/react/24/solid";
+import {
+  ChevronDownIcon,
+  TrashIcon,
+  PlusIcon,
+} from "@heroicons/react/24/solid";
 import Fuse from "fuse.js";
 import type { Book } from "@prisma/client";
 
@@ -37,6 +41,7 @@ const Collections: React.FC = () => {
   const [selectedDropdown, setSelectedDropdown] = useState("");
   const [selectedCollection, setSelectedCollection] = useState("All");
   const [searchResults, setSearchResults] = useState<Book[]>([]);
+  const [addingCollection, setAddingCollection] = useState(false);
 
   const options = {
     includeScore: true,
@@ -103,7 +108,7 @@ const Collections: React.FC = () => {
                             ? "bg-sage-400/60"
                             : ""
                         }` +
-                        " button flex h-full w-fit min-w-[6rem] select-none items-center justify-center rounded-sm border-sage-800 bg-sage-400 px-2 text-sm text-sage-900 hover:bg-sage-400/50"
+                        " button flex h-full w-fit min-w-[6rem] max-w-[10rem] select-none items-center justify-center rounded-sm border-sage-800 bg-sage-400 px-2 text-sm text-sage-900 hover:bg-sage-400/50"
                       }
                       onClick={() => setSelectedCollection(collection.name)}
                     >
@@ -112,6 +117,26 @@ const Collections: React.FC = () => {
                   );
                 })
               : null}
+            {/* add collections tab */}
+            <div className="flex h-full w-fit">
+              <input
+                className={
+                  `${
+                    addingCollection
+                      ? "mr-[1px] w-32 border-[1px] border-sage-400/80 px-1 outline-none"
+                      : "w-0"
+                  }` + " h-full bg-sage-200 transition-all"
+                }
+                type="text"
+              />
+
+              <div
+                className="button h-18 flex w-8 items-center justify-center rounded-sm bg-sage-300 hover:bg-sage-300/40"
+                onClick={() => setAddingCollection(!addingCollection)}
+              >
+                <PlusIcon className="h-6 w-6 text-sage-800"></PlusIcon>
+              </div>
+            </div>
           </div>
           {/* search area */}
           <div className="flex h-16 w-full items-center justify-between p-4">

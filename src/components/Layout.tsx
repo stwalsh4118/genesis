@@ -35,8 +35,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    console.log(collections);
-    console.log("SETTING DEFAULT COLLECTIONS");
     setDefaultCollections();
   }, []);
 
