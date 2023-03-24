@@ -59,16 +59,33 @@ const Collections: React.FC = () => {
       onSuccess: () => {
         toast.success("Book added to collection");
       },
+      onError: () => {
+        toast.error("Failed to add book to collection");
+      },
     });
   const removeBooksFromCollection =
     api.user_collections.removeBooksFromCollection.useMutation({
       onSuccess: () => {
         toast.success("Book removed from collection");
       },
+      onError: () => {
+        toast.error("Failed to remove book from collection");
+      },
     });
   const deleteBook = api.user_books.deleteBook.useMutation({
     onSuccess: () => {
       toast.success("Book deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete book");
+    },
+  });
+  const addCollection = api.user_collections.addCollection.useMutation({
+    onSuccess: () => {
+      toast.success("Collection added");
+    },
+    onError: () => {
+      toast.error("Failed to add collection");
     },
   });
 
@@ -78,6 +95,17 @@ const Collections: React.FC = () => {
     } else {
       setSelectedDropdown(id);
     }
+  };
+
+  const handleAddCollection = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const collectionName = formData.get("name") as string;
+
+    addCollection.mutate({
+      name: collectionName,
+    });
+    setAddingCollection(false);
   };
 
   useOutsideAlerter(dropdown, () => setSelectedDropdown(""));
@@ -119,17 +147,22 @@ const Collections: React.FC = () => {
               : null}
             {/* add collections tab */}
             <div className="flex h-full w-fit">
-              <input
-                className={
-                  `${
-                    addingCollection
-                      ? "mr-[1px] w-32 border-[1px] border-sage-400/80 px-1 outline-none"
-                      : "w-0"
-                  }` + " h-full bg-sage-200 transition-all"
-                }
-                type="text"
-              />
-
+              <form onSubmit={(e) => handleAddCollection(e)}>
+                <input
+                  className={
+                    `${
+                      addingCollection
+                        ? "mr-[1px] w-32 border-[1px] border-sage-400/80 px-1 outline-none"
+                        : "w-0"
+                    }` +
+                    " h-full bg-sage-200 transition-all placeholder:text-sage-800/50"
+                  }
+                  type="text"
+                  name="name"
+                  id="name"
+                  placeholder="Add Collection"
+                />
+              </form>
               <div
                 className="button h-18 flex w-8 items-center justify-center rounded-sm bg-sage-300 hover:bg-sage-300/40"
                 onClick={() => setAddingCollection(!addingCollection)}
@@ -153,9 +186,7 @@ const Collections: React.FC = () => {
                 const books = collections.collections.find(
                   (collection) => collection.name === selectedCollection
                 )?.books;
-
                 if (!books) return;
-
                 const fuse = new Fuse(books, options);
                 const result = fuse.search(e.target.value);
                 const bookResults = result.map((book) => book.item);

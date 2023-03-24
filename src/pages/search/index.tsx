@@ -43,6 +43,9 @@ const Search: React.FC = () => {
     onSuccess: () => {
       toast.success("Book added to your collection");
     },
+    onError: () => {
+      toast.error("Failed to add book to your collection");
+    },
   });
   const { data: collections } = api.user_collections.getCollections.useQuery({
     userId: session?.user.id ? session.user.id : "",
