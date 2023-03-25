@@ -54,6 +54,35 @@ export const userCollectionsRouter = createTRPCRouter({
       return userCollection;
     }),
 
+  deleteCollection: protectedProcedure
+    .input(
+      z.object({
+        collectionId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const user = ctx.session.user;
+
+      const collection = await ctx.prisma.collection.findFirst({
+        where: {
+          id: input.collectionId,
+          userId: user.id,
+        },
+      });
+
+      if (!collection) {
+        throw new Error("Cannot delete collection");
+      }
+
+      const userCollection = await ctx.prisma.collection.delete({
+        where: {
+          id: input.collectionId,
+        },
+      });
+
+      return userCollection;
+    }),
+
   addBooksToCollection: protectedProcedure
     .input(
       z.object({

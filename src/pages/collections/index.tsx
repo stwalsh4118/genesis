@@ -7,6 +7,7 @@ import {
   ChevronDownIcon,
   TrashIcon,
   PlusIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/solid";
 import Fuse from "fuse.js";
 import type { Book } from "@prisma/client";
@@ -42,6 +43,9 @@ const Collections: React.FC = () => {
   const [selectedCollection, setSelectedCollection] = useState("All");
   const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [addingCollection, setAddingCollection] = useState(false);
+  const [deletingCollection, setDeletingCollection] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const dropdown = useRef<HTMLDivElement>(null);
 
   const options = {
     includeScore: true,
@@ -49,7 +53,6 @@ const Collections: React.FC = () => {
   };
 
   const { data } = useSession();
-  const dropdown = useRef<HTMLDivElement>(null);
 
   const { data: collections } = api.user_collections.getCollections.useQuery({
     userId: data?.user.id ? data.user.id : "",
@@ -88,6 +91,14 @@ const Collections: React.FC = () => {
       toast.error("Failed to add collection");
     },
   });
+  const deleteCollection = api.user_collections.deleteCollection.useMutation({
+    onSuccess: () => {
+      toast.success("Collection deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete collection");
+    },
+  });
 
   const handleDropdownSelect = (id: string) => {
     if (selectedDropdown === id) {
@@ -106,6 +117,7 @@ const Collections: React.FC = () => {
       name: collectionName,
     });
     setAddingCollection(false);
+    formRef.current?.reset();
   };
 
   useOutsideAlerter(dropdown, () => setSelectedDropdown(""));
@@ -124,52 +136,76 @@ const Collections: React.FC = () => {
         {/* wrapper */}
         <div className="flex min-h-full w-[70%] flex-col items-center rounded-sm bg-sage-300">
           {/* collections tabs */}
-          <div className="flex h-10 w-full divide-x-[1px] divide-sage-600 rounded-sm border-b-[1px] border-sage-900/20 bg-sage-600 px-2 pt-2 text-sage-800">
-            {collections
-              ? collections.collections.map((collection) => {
-                  return (
-                    <div
-                      key={collection.name}
-                      className={
-                        `${
-                          selectedCollection === collection.name
-                            ? "bg-sage-400/60"
-                            : ""
-                        }` +
-                        " button flex h-full w-fit min-w-[6rem] max-w-[10rem] select-none items-center justify-center rounded-sm border-sage-800 bg-sage-400 px-2 text-sm text-sage-900 hover:bg-sage-400/50"
-                      }
-                      onClick={() => setSelectedCollection(collection.name)}
-                    >
-                      {collection.name}
-                    </div>
-                  );
-                })
-              : null}
-            {/* add collections tab */}
-            <div className="flex h-full w-fit">
-              <form onSubmit={(e) => handleAddCollection(e)}>
-                <input
-                  className={
-                    `${
-                      addingCollection
-                        ? "mr-[1px] w-32 border-[1px] border-sage-400/80 px-1 outline-none"
-                        : "w-0"
-                    }` +
-                    " h-full bg-sage-200 transition-all placeholder:text-sage-800/50"
-                  }
-                  type="text"
-                  name="name"
-                  id="name"
-                  placeholder="Add Collection"
-                />
-              </form>
-              <div
-                className="button h-18 flex w-8 items-center justify-center rounded-sm bg-sage-300 hover:bg-sage-300/40"
-                onClick={() => setAddingCollection(!addingCollection)}
-              >
-                <PlusIcon className="h-6 w-6 text-sage-800"></PlusIcon>
+          <div className="group flex h-10 w-full items-center justify-between bg-sage-600">
+            <div className="flex h-full w-full divide-x-[1px] divide-sage-600 rounded-sm border-b-[1px] border-sage-900/20 px-2 pt-2 text-sage-800">
+              {collections
+                ? collections.collections.map((collection) => {
+                    return (
+                      <div
+                        key={collection.name}
+                        className={
+                          `${
+                            selectedCollection === collection.name
+                              ? "bg-sage-400/60"
+                              : ""
+                          }` +
+                          `${deletingCollection ? "hover:bg-red-400/50" : ""}` +
+                          " button flex h-full w-fit min-w-[6rem] max-w-[10rem] select-none items-center justify-center rounded-sm border-sage-800 bg-sage-400 px-2 text-sm text-sage-900 hover:bg-sage-400/50"
+                        }
+                        onClick={() => {
+                          if (deletingCollection) {
+                            deleteCollection.mutate({
+                              collectionId: collection.id,
+                            });
+                            setDeletingCollection(false);
+                          } else {
+                            setSelectedCollection(collection.name);
+                            setSelectedDropdown("");
+                          }
+                        }}
+                      >
+                        {collection.name}
+                      </div>
+                    );
+                  })
+                : null}
+              {/* add collections tab */}
+              <div className="flex h-full w-fit">
+                <form ref={formRef} onSubmit={(e) => handleAddCollection(e)}>
+                  <input
+                    className={
+                      `${
+                        addingCollection
+                          ? "mr-[1px] w-32 border-[1px] border-sage-400/80 px-1 outline-none"
+                          : "w-0"
+                      }` +
+                      " h-full bg-sage-200 transition-all placeholder:text-sage-800/50"
+                    }
+                    type="text"
+                    name="name"
+                    id="name"
+                    placeholder="Add Collection"
+                  />
+                </form>
+                <div
+                  className="button h-18 flex w-8 items-center justify-center rounded-sm bg-sage-300 hover:bg-sage-300/40"
+                  onClick={() => setAddingCollection(!addingCollection)}
+                >
+                  <PlusIcon className="h-6 w-6 text-sage-800"></PlusIcon>
+                </div>
               </div>
             </div>
+            {!deletingCollection ? (
+              <TrashIcon
+                className="button mr-2 h-6 w-6 text-red-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                onClick={() => setDeletingCollection(true)}
+              ></TrashIcon>
+            ) : (
+              <XMarkIcon
+                className="button mr-2 h-6 w-6 text-red-500 "
+                onClick={() => setDeletingCollection(false)}
+              ></XMarkIcon>
+            )}
           </div>
           {/* search area */}
           <div className="flex h-16 w-full items-center justify-between p-4">
