@@ -66,9 +66,12 @@ model Book {
   title     String
   author    String
   pages     Int?
+  pagesRead Int? @default(0)
   isbn10    String?
   isbn13    String?
   coverUrl  String?
+  rating    Int?
+  review    String?
   read      Boolean  @default(false)
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -31,3 +31,6 @@
 .button {
   @apply select-none hover:cursor-pointer active:translate-y-[1px];
 }
+
+@import "/node_modules/react-grid-layout/css/styles.css";
+@import "/node_modules/react-resizable/css/styles.css";

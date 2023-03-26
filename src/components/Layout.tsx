@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { SignInSidebar } from "./Sidebar/SignInSidebar";
 import { Sidebar } from "./Sidebar/Sidebar";
 import { api } from "@/utils/api";
+import React from "react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -21,20 +22,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const addCollection = api.user_collections.addCollection.useMutation();
 
   const setDefaultCollections = () => {
-    collections
-      ? addCollection.mutate({
-          name: [
-            "All",
-            "Favorite",
-            "Read",
-            "Currently Reading",
-            "Want to Read",
-          ],
-        })
-      : null;
+    addCollection.mutate({
+      name: ["All", "Favorite", "Read", "Currently Reading", "Want to Read"],
+    });
   };
 
   useEffect(() => {
+    console.log("setting default collections");
     setDefaultCollections();
   }, []);
 
