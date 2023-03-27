@@ -69,13 +69,13 @@ const Dashboard: React.FC = () => {
               maxRows={12}
             >
               <div className="bg-sage-300" key="a">
-                a
+                books read total / month / year
               </div>
               <div className="bg-sage-300" key="b">
-                b
+                pages read total / month / year
               </div>
               <div className="bg-sage-300" key="c">
-                c
+                average book rating
               </div>
               <div className="bg-sage-300" key="d">
                 d

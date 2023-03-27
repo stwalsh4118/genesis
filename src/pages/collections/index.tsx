@@ -326,33 +326,29 @@ const Collections: React.FC = () => {
                       rightSlot={
                         <div className="flex h-full flex-col items-end justify-between">
                           <div className="flex w-full items-center justify-between">
-                            {expandedBook === book.id ? (
-                              <TrashIcon
-                                className="button h-6 w-6 text-red-500"
-                                onClick={() => {
-                                  if (!selectedCollection) return;
+                            <TrashIcon
+                              className="button h-6 w-6 text-red-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                              onClick={() => {
+                                if (!selectedCollection) return;
 
-                                  if (selectedCollection !== "All") {
-                                    const currentCollection =
-                                      collections?.collections.find(
-                                        (collection) =>
-                                          collection.name === selectedCollection
-                                      );
+                                if (selectedCollection !== "All") {
+                                  const currentCollection =
+                                    collections?.collections.find(
+                                      (collection) =>
+                                        collection.name === selectedCollection
+                                    );
 
-                                    if (!currentCollection) return;
+                                  if (!currentCollection) return;
 
-                                    removeBooksFromCollection.mutate({
-                                      bookIds: book.id,
-                                      collectionId: currentCollection.id,
-                                    });
-                                  } else {
-                                    deleteBook.mutate({ bookId: book.id });
-                                  }
-                                }}
-                              ></TrashIcon>
-                            ) : (
-                              <div></div>
-                            )}
+                                  removeBooksFromCollection.mutate({
+                                    bookIds: book.id,
+                                    collectionId: currentCollection.id,
+                                  });
+                                } else {
+                                  deleteBook.mutate({ bookId: book.id });
+                                }
+                              }}
+                            ></TrashIcon>
                             <div className="flex flex-col gap-1">
                               <BookDisplay.Pages
                                 pages={book.pages ? book.pages : 0}

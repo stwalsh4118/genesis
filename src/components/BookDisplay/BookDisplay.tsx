@@ -49,14 +49,18 @@ export const BookDisplay: React.FC<BookDisplayProps> &
     <div
       className={`group flex w-full ${
         expanded ? "h-[24rem]" : "h-[12rem]"
-      } shrink-0 justify-between rounded-sm bg-sage-200 p-4 text-sage-800 transition-all`}
+      } shrink-0 justify-between rounded-sm bg-sage-200 text-sage-800 transition-all`}
     >
-      {/* left */}
-      <div className="grow basis-[33%]">{leftSlot}</div>
-      {/* middle */}
-      <div className="grow basis-[33%]">{middleSlot}</div>
-      {/* right */}
-      <div className="grow basis-[33%]">{rightSlot}</div>
+      <div
+        className={`group flex h-[12rem] w-full shrink-0 justify-between rounded-sm bg-sage-200 p-4 text-sage-800 transition-all`}
+      >
+        {/* left */}
+        <div className="grow basis-[33%]">{leftSlot}</div>
+        {/* middle */}
+        <div className="grow basis-[33%]">{middleSlot}</div>
+        {/* right */}
+        <div className="grow basis-[33%]">{rightSlot}</div>
+      </div>
     </div>
   );
 };
@@ -147,27 +151,28 @@ const BookDisplayExpandBookButton: React.FC<{
 }> = ({ setExpanded, bookId, expanded }) => {
   return (
     <>
-      {!expanded ? (
-        <ArrowDownIcon
-          className={`button flex h-6 w-6 ${
-            expanded ? "opacity-100" : "opacity-0"
-          } text-sage-800 transition-opacity duration-300 group-hover:opacity-100`}
-          onClick={() => {
-            console.log("expand ", bookId);
-            setExpanded(expanded ? "" : bookId);
-          }}
-        ></ArrowDownIcon>
-      ) : (
-        <ArrowUpIcon
-          className={`button flex h-6 w-6 ${
-            expanded ? "opacity-100" : "opacity-0"
-          } text-sage-800 transition-opacity duration-300 group-hover:opacity-100`}
-          onClick={() => {
-            console.log("expand ", bookId);
-            setExpanded(expanded ? "" : bookId);
-          }}
-        ></ArrowUpIcon>
-      )}
+      <div
+        className={`button flex h-4 w-fit ${
+          expanded ? "opacity-100" : "opacity-100"
+        } flex items-center justify-center text-sage-800 transition-opacity duration-300 group-hover:opacity-100`}
+        onClick={() => {
+          console.log("expand ", bookId);
+          setExpanded(expanded ? "" : bookId);
+        }}
+      >
+        {!expanded ? (
+          <ArrowDownIcon
+            className={`button flex h-4 w-4 grow text-sage-800`}
+          ></ArrowDownIcon>
+        ) : (
+          <ArrowUpIcon
+            className={`button flex h-4 w-4 grow text-sage-800`}
+          ></ArrowUpIcon>
+        )}
+        <span className="opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          review
+        </span>
+      </div>
     </>
   );
 };
