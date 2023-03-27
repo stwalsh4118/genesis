@@ -1,12 +1,19 @@
 import type { Book } from "@/client";
 import type { UseTRPCMutationResult } from "@trpc/react-query/shared";
 import Image from "next/image";
-import { ReactNode } from "react";
+import { LegacyRef, ReactNode, useEffect, useRef, useState } from "react";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  StarIcon,
+} from "@heroicons/react/24/solid";
+import { StarIcon as StarOutlineIcon } from "@heroicons/react/24/outline";
 
 interface BookDisplayProps {
   leftSlot?: ReactNode;
   middleSlot?: ReactNode;
   rightSlot?: ReactNode;
+  expanded?: boolean;
 }
 
 interface BookDisplayComponents {
@@ -21,12 +28,29 @@ interface BookDisplayComponents {
     book: Book;
     defaultCollectionId: string | undefined;
   }>;
+  ExpandBookButton: React.FC<{
+    setExpanded: React.Dispatch<React.SetStateAction<string>>;
+    bookId: string;
+    expanded: boolean;
+  }>;
+  StarReview: React.FC<{
+    bookId: string;
+    updateBook: UseTRPCMutationResult<any, any, any, any>;
+    initialRating: number;
+  }>;
 }
 
 export const BookDisplay: React.FC<BookDisplayProps> &
-  BookDisplayComponents = ({ leftSlot, middleSlot, rightSlot }) => {
+  BookDisplayComponents = ({ leftSlot, middleSlot, rightSlot, expanded }) => {
+  useEffect(() => {
+    console.log("expanded", expanded);
+  }, [expanded]);
   return (
-    <div className="group flex h-[12rem] w-full justify-between rounded-sm bg-sage-200 p-4 text-sage-800">
+    <div
+      className={`group flex w-full ${
+        expanded ? "h-[24rem]" : "h-[12rem]"
+      } shrink-0 justify-between rounded-sm bg-sage-200 p-4 text-sage-800 transition-all`}
+    >
       {/* left */}
       <div className="grow basis-[33%]">{leftSlot}</div>
       {/* middle */}
@@ -116,6 +140,84 @@ const BookDisplayAddButton: React.FC<{
   );
 };
 
+const BookDisplayExpandBookButton: React.FC<{
+  setExpanded: React.Dispatch<React.SetStateAction<string>>;
+  bookId: string;
+  expanded: boolean;
+}> = ({ setExpanded, bookId, expanded }) => {
+  return (
+    <>
+      {!expanded ? (
+        <ArrowDownIcon
+          className={`button flex h-6 w-6 ${
+            expanded ? "opacity-100" : "opacity-0"
+          } text-sage-800 transition-opacity duration-300 group-hover:opacity-100`}
+          onClick={() => {
+            console.log("expand ", bookId);
+            setExpanded(expanded ? "" : bookId);
+          }}
+        ></ArrowDownIcon>
+      ) : (
+        <ArrowUpIcon
+          className={`button flex h-6 w-6 ${
+            expanded ? "opacity-100" : "opacity-0"
+          } text-sage-800 transition-opacity duration-300 group-hover:opacity-100`}
+          onClick={() => {
+            console.log("expand ", bookId);
+            setExpanded(expanded ? "" : bookId);
+          }}
+        ></ArrowUpIcon>
+      )}
+    </>
+  );
+};
+
+const BookDisplayStarReview: React.FC<{
+  updateBook: UseTRPCMutationResult<any, any, any, any>;
+  bookId: string;
+  initialRating: number;
+}> = ({ updateBook, bookId, initialRating }) => {
+  const maxRating = 5;
+  const [rating, setRating] = useState(initialRating);
+  const [hoverRating, setHoverRating] = useState(0);
+
+  return (
+    <>
+      <div className="flex">
+        {Array.from(Array(maxRating).keys()).map((i) => {
+          return (
+            <div
+              key={i}
+              onMouseEnter={() => {
+                setHoverRating(i + 1);
+              }}
+              onMouseLeave={() => {
+                setHoverRating(0);
+              }}
+              onClick={() => {
+                setRating(i + 1);
+                updateBook.mutate({
+                  bookId: bookId,
+                  data: { rating: i + 1 },
+                });
+              }}
+              className="button h-4 w-4"
+            >
+              {i < rating ? (
+                <StarIcon />
+              ) : i < hoverRating ? (
+                <StarIcon />
+              ) : (
+                <StarOutlineIcon />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+};
+
 BookDisplay.Image = BookDisplayImage;
 BookDisplay.Author = BookDisplayAuthor;
 BookDisplay.Title = BookDisplayTitle;
@@ -123,3 +225,5 @@ BookDisplay.Pages = BookDisplayPages;
 BookDisplay.ISBN10 = BookDisplayISBN10;
 BookDisplay.ISBN13 = BookDisplayISBN13;
 BookDisplay.AddBookButton = BookDisplayAddButton;
+BookDisplay.ExpandBookButton = BookDisplayExpandBookButton;
+BookDisplay.StarReview = BookDisplayStarReview;

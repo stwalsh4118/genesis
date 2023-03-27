@@ -1,8 +1,5 @@
 import { signIn, signOut, useSession } from "next-auth/react";
-import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { BookOpenIcon } from "@heroicons/react/24/outline";
 import { SidebarHeader } from "./SidebarHeader";
 
 interface SidebarProps {
@@ -25,7 +22,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ loaded }) => {
             <div
               className={`${
                 router.asPath === "/dashboard" ? "translate-x-[4.55rem]" : ""
-              } w-full transition-transform duration-300`}
+              } w-fit transition-transform duration-300`}
             >
               {router.asPath === "/dashboard" ? (
                 <div className="text-2xl text-sage-800">MyBrary</div>

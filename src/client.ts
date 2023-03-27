@@ -7,6 +7,8 @@ export interface Book {
   isbn10?: string;
   isbn13?: string;
   coverUrl?: string;
+  rating?: number;
+  review?: string;
 }
 
 export interface BookResponse {

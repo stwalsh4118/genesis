@@ -11,6 +11,8 @@ const bookShape: ZodShape<Book> = {
   isbn10: z.string().optional(),
   isbn13: z.string().optional(),
   coverUrl: z.string().optional(),
+  rating: z.number().optional(),
+  review: z.string().optional(),
 };
 
 export const userBooksRouter = createTRPCRouter({
@@ -74,6 +76,25 @@ export const userBooksRouter = createTRPCRouter({
 
       console.log(userBook);
 
+      return userBook;
+    }),
+
+  updateBook: protectedProcedure
+    .input(
+      z.object({
+        bookId: z.string(),
+        data: z.object(bookShape).partial(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userBook = await ctx.prisma.book.update({
+        where: {
+          id: input.bookId,
+        },
+        data: input.data,
+      });
+      console.log(input.data);
+      console.log(userBook);
       return userBook;
     }),
 

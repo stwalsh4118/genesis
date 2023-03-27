@@ -40,6 +40,7 @@ export const useOutsideAlerter = (
 const Collections: React.FC = () => {
   //state for storing which dropdown is open, use book id since it's unique
   const [selectedDropdown, setSelectedDropdown] = useState("");
+  const [expandedBook, setExpandedBook] = useState("");
   const [selectedCollection, setSelectedCollection] = useState("All");
   const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [addingCollection, setAddingCollection] = useState(false);
@@ -81,6 +82,14 @@ const Collections: React.FC = () => {
     },
     onError: () => {
       toast.error("Failed to delete book");
+    },
+  });
+  const updateBook = api.user_books.updateBook.useMutation({
+    onSuccess: () => {
+      toast.success("Book updated");
+    },
+    onError: () => {
+      toast.error("Failed to update book");
     },
   });
   const addCollection = api.user_collections.addCollection.useMutation({
@@ -129,6 +138,10 @@ const Collections: React.FC = () => {
   useEffect(() => {
     console.log(searchResults);
   }, [searchResults]);
+
+  useEffect(() => {
+    console.log(expandedBook);
+  }, [expandedBook]);
 
   return (
     <>
@@ -245,49 +258,62 @@ const Collections: React.FC = () => {
                   return (
                     <BookDisplay
                       key={index}
+                      expanded={expandedBook === book.id}
                       leftSlot={
-                        <div className="flex justify-between">
-                          <BookDisplay.Image
-                            imageUrl={book.coverUrl ? book.coverUrl : ""}
-                          />
-                          <div className="relative flex h-6 w-36 cursor-pointer select-none text-sm text-sage-800 ">
-                            <div
-                              className="flex h-full w-full items-center justify-center bg-sage-500/50 active:bg-sage-500/80"
-                              onClick={() => handleDropdownSelect(book.id)}
-                            >
-                              <div className="">Add to Collection</div>
-                              <ChevronDownIcon className="ml-2 h-4 w-4" />
-                            </div>
-                            {selectedDropdown === book.id ? (
+                        <div className="flex h-full justify-between">
+                          <div className="h-[12rem]">
+                            <BookDisplay.Image
+                              imageUrl={book.coverUrl ? book.coverUrl : ""}
+                            />
+                          </div>
+                          {/* dropdown */}
+                          <div className="flex h-full flex-col justify-between">
+                            <div className="relative flex h-6 w-36 cursor-pointer select-none text-sm text-sage-800 ">
                               <div
-                                ref={
-                                  selectedDropdown === book.id ? dropdown : null
-                                }
-                                className="absolute top-6 flex h-[8.5rem] w-full flex-col divide-y-[1px] divide-sage-500/80 rounded-b-sm bg-sage-400/50"
+                                className="flex h-full w-full items-center justify-center bg-sage-500/50 active:bg-sage-500/80"
+                                onClick={() => handleDropdownSelect(book.id)}
                               >
-                                {collections
-                                  ? collections.collections.map(
-                                      (collection) => {
-                                        return (
-                                          <div
-                                            key={collection.name}
-                                            className="button flex h-full w-full select-none items-center justify-center rounded-b-sm border-sage-800 px-2 text-sm text-sage-900 hover:bg-sage-400/30 active:bg-sage-400/80"
-                                            onClick={() => {
-                                              addBooksToCollection.mutate({
-                                                bookIds: book.id,
-                                                collectionId: collection.id,
-                                              });
-                                              setSelectedDropdown("");
-                                            }}
-                                          >
-                                            {collection.name}
-                                          </div>
-                                        );
-                                      }
-                                    )
-                                  : null}
+                                <div className="">Add to Collection</div>
+                                <ChevronDownIcon className="ml-2 h-4 w-4" />
                               </div>
-                            ) : null}
+                              {selectedDropdown === book.id ? (
+                                <div
+                                  ref={
+                                    selectedDropdown === book.id
+                                      ? dropdown
+                                      : null
+                                  }
+                                  className="absolute top-6 flex h-[8.5rem] w-full flex-col divide-y-[1px] divide-sage-500/80 rounded-b-sm bg-sage-400/50"
+                                >
+                                  {collections
+                                    ? collections.collections.map(
+                                        (collection) => {
+                                          return (
+                                            <div
+                                              key={collection.name}
+                                              className="button flex h-full w-full select-none items-center justify-center rounded-b-sm border-sage-800 px-2 text-sm text-sage-900 hover:bg-sage-400/30 active:bg-sage-400/80"
+                                              onClick={() => {
+                                                addBooksToCollection.mutate({
+                                                  bookIds: book.id,
+                                                  collectionId: collection.id,
+                                                });
+                                                setSelectedDropdown("");
+                                              }}
+                                            >
+                                              {collection.name}
+                                            </div>
+                                          );
+                                        }
+                                      )
+                                    : null}
+                                </div>
+                              ) : null}
+                            </div>
+                            <BookDisplay.ExpandBookButton
+                              setExpanded={setExpandedBook}
+                              bookId={book.id}
+                              expanded={expandedBook === book.id}
+                            ></BookDisplay.ExpandBookButton>
                           </div>
                         </div>
                       }
@@ -300,9 +326,9 @@ const Collections: React.FC = () => {
                       rightSlot={
                         <div className="flex h-full flex-col items-end justify-between">
                           <div className="flex w-full items-center justify-between">
-                            {
+                            {expandedBook === book.id ? (
                               <TrashIcon
-                                className="button h-6 w-6 text-red-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                                className="button h-6 w-6 text-red-500"
                                 onClick={() => {
                                   if (!selectedCollection) return;
 
@@ -324,10 +350,19 @@ const Collections: React.FC = () => {
                                   }
                                 }}
                               ></TrashIcon>
-                            }
-                            <BookDisplay.Pages
-                              pages={book.pages ? book.pages : 0}
-                            />
+                            ) : (
+                              <div></div>
+                            )}
+                            <div className="flex flex-col gap-1">
+                              <BookDisplay.Pages
+                                pages={book.pages ? book.pages : 0}
+                              />
+                              <BookDisplay.StarReview
+                                updateBook={updateBook}
+                                bookId={book.id}
+                                initialRating={book.rating ? book.rating : 0}
+                              />
+                            </div>
                           </div>
                           <div className="flex flex-col items-end">
                             <BookDisplay.ISBN10
