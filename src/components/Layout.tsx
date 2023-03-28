@@ -16,9 +16,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [loaded, setLoaded] = useState(false);
   const router = useRouter();
 
-  const { data: collections } = api.user_collections.getCollections.useQuery({
-    userId: session?.user.id ? session.user.id : "",
-  });
   const addCollection = api.user_collections.addCollection.useMutation();
 
   const setDefaultCollections = () => {
@@ -41,7 +38,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   useEffect(() => {
     console.log(session);
     session ? void null : void redirectToHome();
-    console.log(status);
     setInterval(() => {
       setLoaded(true);
       // console.log("loaded");

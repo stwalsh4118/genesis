@@ -7,14 +7,15 @@ import { LockOpenIcon, LockClosedIcon } from "@heroicons/react/24/solid";
 
 import "/node_modules/react-grid-layout/css/styles.css";
 import "/node_modules/react-resizable/css/styles.css";
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+import { api } from "@/utils/api";
 
 const Dashboard: React.FC = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [loaded, setLoaded] = useState(false);
   const [locked, setLocked] = useState(true);
+
+  const { data: averageRating } = api.user_dashboard.averageRating.useQuery();
 
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), []);
 
@@ -41,7 +42,7 @@ const Dashboard: React.FC = () => {
   return (
     <>
       {loaded ? (
-        <div className="flex max-w-full grow select-none flex-col overflow-hidden bg-sage-100">
+        <div className="flex max-w-full grow select-none flex-col overflow-x-hidden bg-sage-100">
           <div className="flex h-10 w-full items-center px-10">
             <div
               className="button h-6 w-6 text-sage-800"
@@ -54,7 +55,7 @@ const Dashboard: React.FC = () => {
               )}
             </div>
           </div>
-          <div className="flex max-h-screen max-w-full grow select-none flex-col overflow-hidden bg-sage-100 px-8">
+          <div className="flex min-h-screen max-w-full grow select-none flex-col overflow-hidden bg-sage-100 px-8">
             <ResponsiveGridLayout
               className="layout"
               layouts={{
@@ -65,28 +66,53 @@ const Dashboard: React.FC = () => {
               isDraggable={!locked}
               isResizable={!locked}
               compactType={"vertical"}
-              autoSize={false}
+              autoSize={true}
               maxRows={12}
             >
-              <div className="bg-sage-300" key="a">
+              <div
+                className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
+                key="a"
+              >
                 books read total / month / year
               </div>
-              <div className="bg-sage-300" key="b">
+              <div
+                className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
+                key="b"
+              >
                 pages read total / month / year
               </div>
-              <div className="bg-sage-300" key="c">
-                average book rating
+              <div
+                className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
+                key="c"
+              >
+                <div className="h-6 w-full">Average Rating</div>
+
+                <div className="flex grow items-center justify-center text-5xl font-bold text-sage-800">
+                  {averageRating ? averageRating : "loading"}
+                </div>
               </div>
-              <div className="bg-sage-300" key="d">
+              <div
+                className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
+                key="d"
+              >
                 d
               </div>
-              <div className="bg-sage-300" key="e">
+              <div
+                className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
+                key="e"
+              >
                 e
               </div>
-              <div className="bg-sage-300" key="f">
+              <div
+                className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
+                key="f"
+              >
                 f
               </div>
-              <div className="bg-sage-300" key="h">
+              <div
+                className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
+                key="h"
+              >
                 h
               </div>
             </ResponsiveGridLayout>
