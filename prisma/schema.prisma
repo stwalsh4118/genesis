@@ -50,6 +50,7 @@ model User {
   books         Book[]
   sessions      Session[]
   collections  Collection[]
+  events        Event[]
 }
 
 model VerificationToken {
@@ -91,4 +92,13 @@ model Collection {
   books     Book[]
 
   @@unique([userId, name])
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  eventData Json
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

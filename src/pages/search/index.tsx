@@ -39,9 +39,15 @@ const Search: React.FC = () => {
       },
     ],
   });
+  const addBookEvent = api.events.addBookStartedEvent.useMutation();
+
+  const { data: events } = api.events.getEvents.useQuery();
   const addBook = api.user_books.addBook.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Book added to your collection");
+      addBookEvent.mutate({
+        bookId: data.id,
+      });
     },
     onError: () => {
       toast.error("Failed to add book to your collection");
@@ -58,14 +64,6 @@ const Search: React.FC = () => {
     setFormData(formData.get("search") as string);
     await queryClient.invalidateQueries([searchType, formData.get("search")]);
   };
-
-  useEffect(() => {
-    query.forEach((query) => {
-      if (query.data) {
-        console.log(query.data);
-      }
-    });
-  }, [query]);
 
   return (
     <>
