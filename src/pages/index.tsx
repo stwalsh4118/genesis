@@ -8,7 +8,6 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
   const { data: session } = useSession();
   const router = useRouter();
 
