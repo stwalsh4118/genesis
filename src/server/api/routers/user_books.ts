@@ -24,7 +24,11 @@ export const userBooksRouter = createTRPCRouter({
           id: input.userId,
         },
         select: {
-          books: true,
+          books: {
+            orderBy: {
+              createdAt: "asc",
+            },
+          },
         },
       });
 

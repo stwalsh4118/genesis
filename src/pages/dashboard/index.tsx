@@ -8,6 +8,7 @@ import { LockOpenIcon, LockClosedIcon } from "@heroicons/react/24/solid";
 import "/node_modules/react-grid-layout/css/styles.css";
 import "/node_modules/react-resizable/css/styles.css";
 import { api } from "@/utils/api";
+import { Heatmap } from "@/components/Dashboard/Heatmap";
 
 const Dashboard: React.FC = () => {
   const { data: session, status } = useSession();
@@ -33,9 +34,9 @@ const Dashboard: React.FC = () => {
     { i: "b", x: 2, y: 0, w: 2, h: 2 },
     { i: "c", x: 4, y: 0, w: 2, h: 2 },
 
-    { i: "d", x: 0, y: 2, w: 6, h: 4 },
-    { i: "e", x: 0, y: 6, w: 8, h: 4 },
-    { i: "f", x: 8, y: 6, w: 4, h: 4 },
+    { i: "d", x: 0, y: 2, w: 3, h: 4 },
+    { i: "e", x: 0, y: 6, w: 12, h: 4 },
+    { i: "f", x: 3, y: 2, w: 3, h: 4 },
     { i: "h", x: 7, y: 0, w: 6, h: 6 },
   ];
 
@@ -101,7 +102,7 @@ const Dashboard: React.FC = () => {
                 className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
                 key="e"
               >
-                e
+                <Heatmap></Heatmap>
               </div>
               <div
                 className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"

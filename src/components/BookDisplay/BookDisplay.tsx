@@ -90,10 +90,17 @@ const BookDisplayAuthor: React.FC<{ author: string }> = ({ author }) => {
 };
 
 const BookDisplayPages: React.FC<{ pages: number }> = ({ pages }) => {
+  const [hover, setHover] = useState(false);
+
   return (
     <>
-      <div>
-        {pages} <span className="text-sage-800/70">Pages</span>
+      <div
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        className="flex gap-1"
+      >
+        {hover ? <span>0 /</span> : null}
+        <span>{pages}</span> <span className="text-sage-800/70">Pages</span>
       </div>
     </>
   );
@@ -188,7 +195,7 @@ const BookDisplayStarReview: React.FC<{
 
   return (
     <>
-      <div className="flex">
+      <div className="flex justify-end">
         {Array.from(Array(maxRating).keys()).map((i) => {
           return (
             <div

@@ -13,7 +13,11 @@ export const userCollectionsRouter = createTRPCRouter({
         select: {
           collections: {
             include: {
-              books: true,
+              books: {
+                orderBy: {
+                  createdAt: "asc",
+                },
+              },
             },
           },
         },
