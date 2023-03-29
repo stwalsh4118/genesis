@@ -56,7 +56,7 @@ const Dashboard: React.FC = () => {
               )}
             </div>
           </div>
-          <div className="flex min-h-screen max-w-full grow select-none flex-col overflow-hidden bg-sage-100 px-8">
+          <div className="flex min-h-[calc(100vh-2.5rem)] max-w-full grow select-none flex-col overflow-hidden bg-sage-100 px-8">
             <ResponsiveGridLayout
               className="layout"
               layouts={{

@@ -4,6 +4,17 @@ export const Heatmap: React.FC = () => {
   const [dates, setDates] = useState<(Date | null)[][]>(
     groupDatesByWeek(getDatesPreviousYear(), true)
   );
+  const [months, setMonths] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (dates) {
+      setMonths([...populateMonths(dates)]);
+    }
+  }, [dates]);
+
+  useEffect(() => {
+    console.log("MONTHS", months);
+  }, [months]);
 
   useEffect(() => {
     console.log("DATES", dates);
@@ -11,29 +22,43 @@ export const Heatmap: React.FC = () => {
 
   return (
     <>
-      <div className="flex h-full w-full flex-col flex-wrap gap-1 bg-sage-400/20 px-10 pt-[5.5rem] pb-8">
-        {/* {Array.from(Array(365).keys()).map((i) => {
-          return <div key={i} className="h-6 w-6 bg-sage-400"></div>;
-        })} */}
-        {dates.map((week, i) => {
-          return (
-            <div
-              key={i}
-              className="flex h-full flex-col-reverse flex-wrap gap-1"
-            >
-              {week.map((day, j) => {
-                if (!day) return <div key={j} className="h-6 w-6"></div>;
-                return (
-                  <div
-                    key={j}
-                    className="h-6 w-6 bg-sage-400"
-                    title={day.toDateString()}
-                  ></div>
-                );
-              })}
-            </div>
-          );
-        })}
+      <div className="flex h-full w-full flex-col bg-sage-400/20 px-9 pt-[5.5rem] pb-8">
+        <div className="flex h-4 w-full shrink-0 text-sage-800">
+          {months.map((month, i) => {
+            return (
+              <div
+                key={i}
+                className="flex h-full w-1/12 items-center justify-start"
+              >
+                {month}
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex h-full w-full flex-col flex-wrap gap-1 ">
+          {/* {Array.from(Array(365).keys()).map((i) => {
+            return <div key={i} className="h-6 w-6 bg-sage-400"></div>;
+          })} */}
+          {dates.map((week, i) => {
+            return (
+              <div
+                key={i}
+                className="flex h-full flex-col-reverse flex-wrap gap-1"
+              >
+                {week.map((day, j) => {
+                  if (!day) return <div key={j} className="h-6 w-6"></div>;
+                  return (
+                    <div
+                      key={j}
+                      className="h-6 w-6 bg-sage-400"
+                      title={day.toDateString()}
+                    ></div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </>
   );
@@ -80,6 +105,7 @@ const groupDatesByWeek = (dates: Date[], fillLastWeek: boolean) => {
   for (let i = 0; i < dates.length; i++) {
     const date = dates[i];
     if (date?.getDay() === weekStart) {
+      groupedDates[groupedDates.length - 1]?.reverse();
       groupedDates.push([]);
     }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -88,14 +114,34 @@ const groupDatesByWeek = (dates: Date[], fillLastWeek: boolean) => {
 
   if (fillLastWeek) {
     groupedDates[groupedDates.length - 1] = [
+      ...groupedDates[groupedDates.length - 1]!,
       ...Array.from(
         Array(7 - groupedDates[groupedDates.length - 1]!.length).keys()
       ).map(() => {
         return null;
       }),
-      ...groupedDates[groupedDates.length - 1]!,
     ];
+
+    groupedDates[groupedDates.length - 1]?.reverse();
   }
 
   return groupedDates;
+};
+
+const populateMonths = (dates: (Date | null)[][]) => {
+  const months = [] as string[];
+
+  for (let i = 0; i < dates.length; i++) {
+    const date = dates[i]![dates[i]!.length - 1];
+    if (!date) continue;
+
+    const month = date.toLocaleString("default", { month: "long" });
+    if (!months.includes(month)) {
+      months.push(month);
+    }
+  }
+
+  months.push(new Date().toLocaleString("default", { month: "long" }));
+
+  return months;
 };

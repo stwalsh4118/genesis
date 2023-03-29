@@ -51,9 +51,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <meta name="description" content="Website for all your books!" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="flex h-full min-h-screen w-full bg-sage-100">
+      <div className="flex h-screen w-full overflow-hidden bg-sage-100">
         <div
-          className={`flex min-w-[10rem] shrink-0 select-none border-r border-sage-700 bg-sage-300 transition-["width"] duration-500 ${
+          className={`flex max-h-screen min-w-[10rem] shrink-0 select-none border-r border-sage-700 bg-sage-300 transition-["width"] duration-500 ${
             loaded && status === "authenticated" ? "w-[16rem]" : "w-[30%]"
           }`}
         >

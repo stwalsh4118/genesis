@@ -12,7 +12,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ loaded }) => {
 
   return (
     <>
-      <div className="flex h-full w-full flex-col items-center justify-between pb-8">
+      <div className="flex h-full max-h-screen w-full flex-col items-center justify-between pb-8">
         <div
           className={`flex h-full w-full flex-col items-center divide-y text-sage-800 transition-opacity duration-500 ${
             loaded ? "opacity-100" : "opacity-0"
