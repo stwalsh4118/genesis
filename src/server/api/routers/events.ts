@@ -22,6 +22,32 @@ export interface PagesReadEventData extends EventData {
   pagesRead: number;
 }
 
+const generateFakePagesReadEvents = (bookId: string) => {
+  const events: PagesReadEventData[] = [];
+
+  for (let i = 0; i < 10; i++) {
+    events.push({
+      eventType: "pages_read",
+      bookId,
+      pagesRead: Math.floor(Math.random() * 100),
+    });
+  }
+
+  return events;
+};
+
+const generateFakeEventDates = (events: EventData[]) => {
+  const eventDates: Date[] = [];
+
+  for (let i = 0; i < events.length; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() - Math.floor(Math.random() * 360));
+    eventDates.push(date);
+  }
+
+  return eventDates;
+};
+
 export const eventsRouter = createTRPCRouter({
   getEvents: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx.session.user;
@@ -132,4 +158,36 @@ export const eventsRouter = createTRPCRouter({
 
       return event;
     }),
+
+  addFakeEvents: protectedProcedure.mutation(async ({ ctx }) => {
+    const user = ctx.session.user;
+
+    const book = await ctx.prisma.book.findFirst({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    const events: EventData[] = [];
+
+    if (!book) {
+      return false;
+    }
+
+    events.push(...generateFakePagesReadEvents(book.id));
+
+    const eventDates = generateFakeEventDates(events);
+
+    for (let i = 0; i < events.length; i++) {
+      await ctx.prisma.event.create({
+        data: {
+          userId: user.id,
+          eventData: events[i] as unknown as Prisma.JsonObject,
+          createdAt: eventDates[i],
+        },
+      });
+    }
+
+    return true;
+  }),
 });

@@ -1,10 +1,17 @@
+import { api } from "@/utils/api";
+import { type Event } from "@prisma/client";
 import { useEffect, useState } from "react";
 
-export const Heatmap: React.FC = () => {
+interface HeatmapProps {
+  Events?: Event;
+}
+
+export const Heatmap: React.FC<HeatmapProps> = ({ Events }) => {
   const [dates, setDates] = useState<(Date | null)[][]>(
     groupDatesByWeek(getDatesPreviousYear(), true)
   );
   const [months, setMonths] = useState<string[]>([]);
+  const generateFakeEvents = api.events.addFakeEvents.useMutation();
 
   useEffect(() => {
     if (dates) {
@@ -22,7 +29,10 @@ export const Heatmap: React.FC = () => {
 
   return (
     <>
-      <div className="flex h-full w-full flex-col bg-sage-400/20 px-9 pt-[5.5rem] pb-8">
+      <div
+        className="flex h-full w-full flex-col bg-sage-400/20 px-9 pt-[5.5rem] pb-8"
+        onClick={() => void generateFakeEvents.mutate()}
+      >
         <div className="flex h-4 w-full shrink-0 text-sage-800">
           {months.map((month, i) => {
             return (
@@ -50,7 +60,7 @@ export const Heatmap: React.FC = () => {
                   return (
                     <div
                       key={j}
-                      className="h-6 w-6 bg-sage-400"
+                      className="h-6 w-6 rounded-sm border-[1px] border-sage-800/20 bg-sage-200 shadow-sm"
                       title={day.toDateString()}
                     ></div>
                   );
