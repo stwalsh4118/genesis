@@ -1,3 +1,4 @@
+import { PagesReadEventData } from "@/server/api/routers/events";
 import { api } from "@/utils/api";
 import { type Event } from "@prisma/client";
 import { useEffect, useState } from "react";
@@ -11,7 +12,17 @@ export const Heatmap: React.FC<HeatmapProps> = ({ Events }) => {
     groupDatesByWeek(getDatesPreviousYear(), true)
   );
   const [months, setMonths] = useState<string[]>([]);
+  const [pagesRead, setPagesRead] = useState<Map<string, number>>(new Map());
   const generateFakeEvents = api.events.addFakeEvents.useMutation();
+  const { data: events } = api.events.getEvents.useQuery();
+
+  useEffect(() => {
+    if (events) {
+      const groupedEvents = groupEventsByDay(events);
+      const aggregatedPages = aggregatePagesRead(groupedEvents);
+      setPagesRead(aggregatedPages);
+    }
+  }, [events]);
 
   useEffect(() => {
     if (dates) {
@@ -30,8 +41,8 @@ export const Heatmap: React.FC<HeatmapProps> = ({ Events }) => {
   return (
     <>
       <div
-        className="flex h-full w-full flex-col bg-sage-400/20 px-9 pt-[5.5rem] pb-8"
-        onClick={() => void generateFakeEvents.mutate()}
+        className="flex h-full w-full flex-col items-center justify-end gap-4 bg-sage-400/20 px-4"
+        // onClick={() => void generateFakeEvents.mutate()}
       >
         <div className="flex h-4 w-full shrink-0 text-sage-800">
           {months.map((month, i) => {
@@ -45,10 +56,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ Events }) => {
             );
           })}
         </div>
-        <div className="flex h-full w-full flex-col flex-wrap gap-1 ">
-          {/* {Array.from(Array(365).keys()).map((i) => {
-            return <div key={i} className="h-6 w-6 bg-sage-400"></div>;
-          })} */}
+        <div className="flex h-48 w-full shrink flex-col flex-wrap gap-1 ">
           {dates.map((week, i) => {
             return (
               <div
@@ -56,18 +64,44 @@ export const Heatmap: React.FC<HeatmapProps> = ({ Events }) => {
                 className="flex h-full flex-col-reverse flex-wrap gap-1"
               >
                 {week.map((day, j) => {
-                  if (!day) return <div key={j} className="h-6 w-6"></div>;
+                  if (!day || !pagesRead) {
+                    return <div key={j} className="h-6 w-6"></div>;
+                  }
+
+                  const maxPages = Math.max(...Array.from(pagesRead.values()));
+
+                  const hasRead = pagesRead.get(
+                    day.toISOString().split("T")[0]!
+                  );
+
                   return (
                     <div
                       key={j}
-                      className="h-6 w-6 rounded-sm border-[1px] border-sage-800/20 bg-sage-200 shadow-sm"
-                      title={day.toDateString()}
+                      className={`h-6 w-6 rounded-sm border-[1px] border-sage-800/20 ${generateHeatmapColor(
+                        hasRead
+                          ? pagesRead.get(day.toISOString().split("T")[0]!)!
+                          : 0,
+                        maxPages
+                      )} shadow-sm`}
+                      title={`${
+                        pagesRead.get(day.toISOString().split("T")[0]!)! || 0
+                      } Pages Read on ${day.toDateString()}`}
                     ></div>
                   );
                 })}
               </div>
             );
           })}
+        </div>
+        <div className="flex items-center justify-end gap-1 self-end px-2 pb-2">
+          <div>Less</div>
+          <div className="h-3 w-3 rounded-sm border-[1px] border-sage-800/20 bg-sage-300"></div>
+          <div className="h-3 w-3 rounded-sm border-[1px] border-sage-800/20 bg-sage-400"></div>
+          <div className="h-3 w-3 rounded-sm border-[1px] border-sage-800/20 bg-sage-500"></div>
+          <div className="h-3 w-3 rounded-sm border-[1px] border-sage-800/20 bg-sage-600"></div>
+          <div className="h-3 w-3 rounded-sm border-[1px] border-sage-800/20 bg-sage-700"></div>
+          <div className="h-3 w-3 rounded-sm border-[1px] border-sage-800/20 bg-sage-800"></div>
+          <div>More</div>
         </div>
       </div>
     </>
@@ -154,4 +188,54 @@ const populateMonths = (dates: (Date | null)[][]) => {
   months.push(new Date().toLocaleString("default", { month: "long" }));
 
   return months;
+};
+
+const groupEventsByDay = (events: Event[]): Map<string, Event[]> => {
+  const groupedEventMap = new Map<string, Event[]>();
+
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i];
+    if (!event) continue;
+
+    const dateString = new Date(event.createdAt).toISOString().split("T")[0];
+
+    if (!dateString) continue;
+
+    if (groupedEventMap.has(dateString)) {
+      groupedEventMap.get(dateString)?.push(event);
+    } else {
+      groupedEventMap.set(dateString, [event]);
+    }
+  }
+
+  return groupedEventMap;
+};
+
+const aggregatePagesRead = (
+  groupedEventMap: Map<string, Event[]>
+): Map<string, number> => {
+  const aggregatedEventMap = new Map<string, number>();
+
+  for (const [date, events] of groupedEventMap) {
+    const pagesRead = events.reduce((acc, event) => {
+      return acc + (event.eventData as unknown as PagesReadEventData).pagesRead;
+    }, 0);
+
+    aggregatedEventMap.set(date, pagesRead);
+  }
+
+  return aggregatedEventMap;
+};
+
+const generateHeatmapColor = (pagesRead: number, maxPagesRead: number) => {
+  const percentOfMax = pagesRead / maxPagesRead;
+
+  if (percentOfMax === 0) return "bg-sage-300";
+
+  if (percentOfMax < 0.25) return "bg-sage-400";
+  if (percentOfMax < 0.5) return "bg-sage-500";
+  if (percentOfMax < 0.75) return "bg-sage-600";
+  if (percentOfMax < 1) return "bg-sage-700";
+
+  return "bg-sage-800";
 };

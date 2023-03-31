@@ -259,6 +259,9 @@ const Collections: React.FC = () => {
                     <BookDisplay
                       key={index}
                       expanded={expandedBook === book.id}
+                      expandable={true}
+                      expandDisplay={setExpandedBook}
+                      bookId={book.id}
                       leftSlot={
                         <div className="flex h-full justify-between">
                           <div className="h-[12rem]">

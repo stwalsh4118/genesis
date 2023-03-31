@@ -14,6 +14,9 @@ interface BookDisplayProps {
   middleSlot?: ReactNode;
   rightSlot?: ReactNode;
   expanded?: boolean;
+  expandable?: boolean;
+  expandDisplay?: React.Dispatch<React.SetStateAction<string>>;
+  bookId?: string;
 }
 
 interface BookDisplayComponents {
@@ -41,7 +44,15 @@ interface BookDisplayComponents {
 }
 
 export const BookDisplay: React.FC<BookDisplayProps> &
-  BookDisplayComponents = ({ leftSlot, middleSlot, rightSlot, expanded }) => {
+  BookDisplayComponents = ({
+  leftSlot,
+  middleSlot,
+  rightSlot,
+  expanded,
+  expandable,
+  expandDisplay,
+  bookId,
+}) => {
   useEffect(() => {
     console.log("expanded", expanded);
   }, [expanded]);
@@ -50,6 +61,15 @@ export const BookDisplay: React.FC<BookDisplayProps> &
       className={`group flex w-full ${
         expanded ? "h-[24rem]" : "h-[12rem]"
       } shrink-0 justify-between rounded-sm bg-sage-200 text-sage-800 transition-all`}
+      onClick={() => {
+        if (!expandable) return;
+        if (expanded) {
+          expandDisplay?.("");
+        }
+        if (!expanded && bookId) {
+          expandDisplay?.(bookId);
+        }
+      }}
     >
       <div
         className={`group flex h-[12rem] w-full shrink-0 justify-between rounded-sm bg-sage-200 p-4 text-sage-800 transition-all`}
@@ -90,16 +110,12 @@ const BookDisplayAuthor: React.FC<{ author: string }> = ({ author }) => {
 };
 
 const BookDisplayPages: React.FC<{ pages: number }> = ({ pages }) => {
-  const [hover, setHover] = useState(false);
-
   return (
     <>
-      <div
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
-        className="flex gap-1"
-      >
-        {hover ? <span>0 /</span> : null}
+      <div className="flex gap-1">
+        <span className="opacity-0 duration-300 group-hover:opacity-100">
+          0 /
+        </span>
         <span>{pages}</span> <span className="text-sage-800/70">Pages</span>
       </div>
     </>
