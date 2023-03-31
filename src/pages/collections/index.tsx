@@ -355,6 +355,8 @@ const Collections: React.FC = () => {
                             <div className="flex flex-col justify-end gap-1">
                               <BookDisplay.Pages
                                 pages={book.pages ? book.pages : 0}
+                                bookId={book.id}
+                                readPages={book.pagesRead ? book.pagesRead : 0}
                               />
                               <BookDisplay.StarReview
                                 updateBook={updateBook}

@@ -68,8 +68,6 @@ export const Heatmap: React.FC<HeatmapProps> = ({ Events }) => {
                     return <div key={j} className="h-6 w-6"></div>;
                   }
 
-                  const maxPages = Math.max(...Array.from(pagesRead.values()));
-
                   const hasRead = pagesRead.get(
                     day.toISOString().split("T")[0]!
                   );
@@ -80,8 +78,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ Events }) => {
                       className={`h-6 w-6 rounded-sm border-[1px] border-sage-800/20 ${generateHeatmapColor(
                         hasRead
                           ? pagesRead.get(day.toISOString().split("T")[0]!)!
-                          : 0,
-                        maxPages
+                          : 0
                       )} shadow-sm`}
                       title={`${
                         pagesRead.get(day.toISOString().split("T")[0]!)! || 0
@@ -227,15 +224,13 @@ const aggregatePagesRead = (
   return aggregatedEventMap;
 };
 
-const generateHeatmapColor = (pagesRead: number, maxPagesRead: number) => {
-  const percentOfMax = pagesRead / maxPagesRead;
+const generateHeatmapColor = (pagesRead: number) => {
+  if (pagesRead === 0) return "bg-sage-300";
+  if (pagesRead <= 25) return "bg-sage-400";
+  if (pagesRead <= 50) return "bg-sage-500";
+  if (pagesRead <= 75) return "bg-sage-600";
+  if (pagesRead <= 200) return "bg-sage-700";
+  if (pagesRead > 200) return "bg-sage-800";
 
-  if (percentOfMax === 0) return "bg-sage-300";
-
-  if (percentOfMax < 0.25) return "bg-sage-400";
-  if (percentOfMax < 0.5) return "bg-sage-500";
-  if (percentOfMax < 0.75) return "bg-sage-600";
-  if (percentOfMax < 1) return "bg-sage-700";
-
-  return "bg-sage-800";
+  return "bg-sage-300";
 };

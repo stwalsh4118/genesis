@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import type { ZodShape } from "@/server/api/trpc";
 import type { Book } from "@/client";
+import { TRPCError } from "@trpc/server";
 
 const bookShape: ZodShape<Book> = {
   title: z.string(),
@@ -99,6 +100,34 @@ export const userBooksRouter = createTRPCRouter({
       });
       console.log(input.data);
       console.log(userBook);
+      return userBook;
+    }),
+
+  updatePagesRead: protectedProcedure
+    .input(
+      z.object({
+        bookId: z.string(),
+        pagesRead: z.number(),
+        prevPages: z.number(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (input.pagesRead < input.prevPages) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Pages read cannot be less than previous pages read",
+        });
+      }
+
+      const userBook = await ctx.prisma.book.update({
+        where: {
+          id: input.bookId,
+        },
+        data: {
+          pagesRead: input.pagesRead,
+        },
+      });
+
       return userBook;
     }),
 

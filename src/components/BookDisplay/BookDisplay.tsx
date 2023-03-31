@@ -6,8 +6,12 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   StarIcon,
+  CheckIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/solid";
 import { StarIcon as StarOutlineIcon } from "@heroicons/react/24/outline";
+import { api } from "@/utils/api";
+import { toast } from "react-toastify";
 
 interface BookDisplayProps {
   leftSlot?: ReactNode;
@@ -23,7 +27,7 @@ interface BookDisplayComponents {
   Image: React.FC<{ imageUrl: string }>;
   Title: React.FC<{ title: string }>;
   Author: React.FC<{ author: string }>;
-  Pages: React.FC<{ pages: number }>;
+  Pages: React.FC<{ pages: number; bookId: string; readPages?: number }>;
   ISBN10: React.FC<{ isbn10: string }>;
   ISBN13: React.FC<{ isbn13: string }>;
   AddBookButton: React.FC<{
@@ -109,13 +113,79 @@ const BookDisplayAuthor: React.FC<{ author: string }> = ({ author }) => {
   );
 };
 
-const BookDisplayPages: React.FC<{ pages: number }> = ({ pages }) => {
+const BookDisplayPages: React.FC<{
+  pages: number;
+  bookId: string;
+  readPages?: number;
+}> = ({ pages, bookId, readPages }) => {
+  const inputRef = useRef<LegacyRef<HTMLInputElement>>(null);
+  const [inputValue, setInputValue] = useState<number>(readPages || 0);
+  const [dirty, setDirty] = useState<boolean>(false);
+  const addReadPagesEvent = api.events.addPagesReadEvent.useMutation();
+  const updateBook = api.user_books.updatePagesRead.useMutation({
+    onSuccess: (data, variables) => {
+      setDirty(false);
+      toast.success("Updated read pages for book");
+      addReadPagesEvent.mutate({
+        bookId: variables.bookId,
+        pagesRead: inputValue - (readPages || 0),
+      });
+    },
+    onError: () => {
+      toast.error("Failed to update read pages for book");
+    },
+  });
+
   return (
     <>
-      <div className="flex gap-1">
-        <span className="opacity-0 duration-300 group-hover:opacity-100">
-          0 /
-        </span>
+      <div
+        className="flex items-center justify-center gap-1"
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {readPages || readPages === 0 ? (
+          <>
+            {dirty ? (
+              <>
+                <CheckIcon
+                  className="h-4 w-4 text-green-800"
+                  onClick={() => {
+                    updateBook.mutate({
+                      bookId: bookId,
+                      pagesRead: inputValue,
+                      prevPages: readPages,
+                    });
+                  }}
+                ></CheckIcon>
+                <XMarkIcon
+                  className="h-4 w-4 text-red-800"
+                  onClick={() => {
+                    setInputValue(readPages || 0);
+                    (inputRef.current as unknown as HTMLInputElement).value =
+                      readPages.toFixed(0) || "0";
+                    setDirty(false);
+                  }}
+                ></XMarkIcon>
+              </>
+            ) : null}
+            <input
+              className="z-60 w-10 bg-sage-200 pl-1 text-right text-sage-800"
+              type="number"
+              placeholder={"0"}
+              defaultValue={readPages}
+              onClick={() => {
+                (inputRef.current as unknown as HTMLInputElement).select();
+              }}
+              ref={inputRef as LegacyRef<HTMLInputElement>}
+              onChange={(e) => {
+                setInputValue(parseInt(e.target.value));
+                setDirty(true);
+              }}
+            ></input>
+            <span className="text-sage-800">/</span>
+          </>
+        ) : null}
         <span>{pages}</span> <span className="text-sage-800/70">Pages</span>
       </div>
     </>
@@ -154,11 +224,12 @@ const BookDisplayAddButton: React.FC<{
     <>
       <button
         className="rounded-sm bg-sage-800 p-1 text-sm text-sage-200"
-        onClick={() => {
+        onClick={(e) => {
           addBook.mutate({
             book: book,
             collectionId: defaultCollectionId,
           });
+          e.stopPropagation();
         }}
       >
         Add Book
@@ -211,7 +282,12 @@ const BookDisplayStarReview: React.FC<{
 
   return (
     <>
-      <div className="flex justify-end">
+      <div
+        className="flex justify-end"
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
         {Array.from(Array(maxRating).keys()).map((i) => {
           return (
             <div
