@@ -154,6 +154,7 @@ const BookDisplayPages: React.FC<{
                     updateBook.mutate({
                       bookId: bookId,
                       pagesRead: inputValue,
+                      totalPages: pages,
                       prevPages: readPages,
                     });
                   }}

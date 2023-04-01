@@ -128,7 +128,7 @@ const getDatesBetween = (startDate: Date, endDate: Date) => {
   return dates;
 };
 
-const getDatesPreviousYear = () => {
+export const getDatesPreviousYear = () => {
   const today = new Date();
   const lastYear = new Date(
     today.getFullYear() - 1,
@@ -187,7 +187,7 @@ const populateMonths = (dates: (Date | null)[][]) => {
   return months;
 };
 
-const groupEventsByDay = (events: Event[]): Map<string, Event[]> => {
+export const groupEventsByDay = (events: Event[]): Map<string, Event[]> => {
   const groupedEventMap = new Map<string, Event[]>();
 
   for (let i = 0; i < events.length; i++) {

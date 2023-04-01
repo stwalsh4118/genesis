@@ -129,6 +129,7 @@ export const eventsRouter = createTRPCRouter({
       const event = await ctx.prisma.event.create({
         data: {
           userId: user.id,
+          createdAt: new Date(),
           eventData: eventData as unknown as Prisma.JsonObject,
         },
       });

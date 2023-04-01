@@ -108,6 +108,7 @@ export const userBooksRouter = createTRPCRouter({
       z.object({
         bookId: z.string(),
         pagesRead: z.number(),
+        totalPages: z.number(),
         prevPages: z.number(),
       })
     )
@@ -116,6 +117,11 @@ export const userBooksRouter = createTRPCRouter({
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Pages read cannot be less than previous pages read",
+        });
+      } else if (input.pagesRead > input.totalPages) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Pages read cannot be more than total pages",
         });
       }
 

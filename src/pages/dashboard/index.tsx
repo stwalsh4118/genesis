@@ -17,6 +17,11 @@ const Dashboard: React.FC = () => {
   const [locked, setLocked] = useState(true);
 
   const { data: averageRating } = api.user_dashboard.averageRating.useQuery();
+  const { data: finishedBooks } =
+    api.user_dashboard.totalBooksFinished.useQuery();
+  const { data: pagesTotal } = api.user_dashboard.totalPagesRead.useQuery();
+  const { data: pagesOverTime } =
+    api.user_dashboard.pagesReadOverTime.useQuery();
 
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), []);
 
@@ -74,13 +79,29 @@ const Dashboard: React.FC = () => {
                 className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
                 key="a"
               >
-                books read total / month / year
+                <div className="h-6 w-full">Total Pages Read</div>
+
+                <div
+                  className={`flex grow items-center justify-center ${
+                    pagesTotal ? "text-5xl" : "text-xl"
+                  } font-bold text-sage-800`}
+                >
+                  {pagesTotal ? pagesTotal : "Read some pages!"}
+                </div>
               </div>
               <div
                 className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
                 key="b"
               >
-                pages read total / month / year
+                <div className="h-6 w-full">Total Finished Books</div>
+
+                <div
+                  className={`flex grow items-center justify-center ${
+                    finishedBooks ? "text-5xl" : "text-xl"
+                  } font-bold text-sage-800`}
+                >
+                  {finishedBooks ? finishedBooks : "Read some books!"}
+                </div>
               </div>
               <div
                 className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
@@ -88,8 +109,12 @@ const Dashboard: React.FC = () => {
               >
                 <div className="h-6 w-full">Average Rating</div>
 
-                <div className="flex grow items-center justify-center text-5xl font-bold text-sage-800">
-                  {averageRating ? averageRating : "loading"}
+                <div
+                  className={`flex grow items-center justify-center ${
+                    averageRating ? "text-5xl" : "text-xl"
+                  } font-bold text-sage-800`}
+                >
+                  {averageRating ? averageRating : "Rate some books!"}
                 </div>
               </div>
               <div
