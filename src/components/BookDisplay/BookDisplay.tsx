@@ -27,7 +27,7 @@ interface BookDisplayComponents {
   Image: React.FC<{ imageUrl: string }>;
   Title: React.FC<{ title: string }>;
   Author: React.FC<{ author: string }>;
-  Pages: React.FC<{ pages: number; bookId: string; readPages?: number }>;
+  Pages: React.FC<{ pages: number; bookId?: string; readPages?: number }>;
   ISBN10: React.FC<{ isbn10: string }>;
   ISBN13: React.FC<{ isbn13: string }>;
   AddBookButton: React.FC<{
@@ -115,7 +115,7 @@ const BookDisplayAuthor: React.FC<{ author: string }> = ({ author }) => {
 
 const BookDisplayPages: React.FC<{
   pages: number;
-  bookId: string;
+  bookId?: string;
   readPages?: number;
 }> = ({ pages, bookId, readPages }) => {
   const inputRef = useRef<LegacyRef<HTMLInputElement>>(null);
@@ -152,7 +152,7 @@ const BookDisplayPages: React.FC<{
                   className="h-4 w-4 text-green-800"
                   onClick={() => {
                     updateBook.mutate({
-                      bookId: bookId,
+                      bookId: bookId ? bookId : "",
                       pagesRead: inputValue,
                       totalPages: pages,
                       prevPages: readPages,
