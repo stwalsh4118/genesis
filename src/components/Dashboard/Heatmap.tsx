@@ -1,4 +1,4 @@
-import { PagesReadEventData } from "@/server/api/routers/events";
+import { EventData, PagesReadEventData } from "@/server/api/routers/events";
 import { api } from "@/utils/api";
 import { type Event } from "@prisma/client";
 import { useEffect, useState } from "react";
@@ -105,6 +105,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ Events }) => {
   );
 };
 
+//gets dates bewteen two dates
 const getDatesBetween = (startDate: Date, endDate: Date) => {
   const dates = [];
 
@@ -128,6 +129,7 @@ const getDatesBetween = (startDate: Date, endDate: Date) => {
   return dates;
 };
 
+//uses getDatesBetween to get dates from previous year
 export const getDatesPreviousYear = () => {
   const today = new Date();
   const lastYear = new Date(
@@ -139,6 +141,7 @@ export const getDatesPreviousYear = () => {
   return getDatesBetween(lastYear, today).splice(1);
 };
 
+//groups the dates into the weeks they belong to
 const groupDatesByWeek = (dates: Date[], fillLastWeek: boolean) => {
   const groupedDates = [[]] as (Date | null)[][];
   const weekStart = 0; // 0 === Sunday
@@ -169,6 +172,7 @@ const groupDatesByWeek = (dates: Date[], fillLastWeek: boolean) => {
   return groupedDates;
 };
 
+//gets the previous months in correct order
 const populateMonths = (dates: (Date | null)[][]) => {
   const months = [] as string[];
 
@@ -187,6 +191,7 @@ const populateMonths = (dates: (Date | null)[][]) => {
   return months;
 };
 
+//groups events into the days they show up
 export const groupEventsByDay = (events: Event[]): Map<string, Event[]> => {
   const groupedEventMap = new Map<string, Event[]>();
 
@@ -208,22 +213,29 @@ export const groupEventsByDay = (events: Event[]): Map<string, Event[]> => {
   return groupedEventMap;
 };
 
+//aggregates the pages read for each day
 const aggregatePagesRead = (
   groupedEventMap: Map<string, Event[]>
 ): Map<string, number> => {
   const aggregatedEventMap = new Map<string, number>();
 
   for (const [date, events] of groupedEventMap) {
-    const pagesRead = events.reduce((acc, event) => {
+    const onlyPagesReadEvents = events.filter(
+      (event) =>
+        (event.eventData as unknown as EventData).eventType === "pages_read"
+    );
+
+    const pagesRead = onlyPagesReadEvents.reduce((acc, event) => {
       return acc + (event.eventData as unknown as PagesReadEventData).pagesRead;
     }, 0);
-
+    console.log(pagesRead);
     aggregatedEventMap.set(date, pagesRead);
   }
 
   return aggregatedEventMap;
 };
 
+//generates the heatmap color for each day based on the number of pages read
 const generateHeatmapColor = (pagesRead: number) => {
   if (pagesRead === 0) return "bg-sage-300";
   if (pagesRead <= 25) return "bg-sage-400";
@@ -232,5 +244,6 @@ const generateHeatmapColor = (pagesRead: number) => {
   if (pagesRead <= 200) return "bg-sage-700";
   if (pagesRead > 200) return "bg-sage-800";
 
+  console.log("GENERATING HEATMAP COLOR", pagesRead);
   return "bg-sage-300";
 };

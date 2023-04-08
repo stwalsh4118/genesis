@@ -9,7 +9,7 @@ type EventType =
   | "pages_read"
   | "review_added";
 
-interface EventData {
+export interface EventData {
   eventType: EventType;
 }
 
