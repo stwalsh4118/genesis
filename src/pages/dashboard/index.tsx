@@ -9,6 +9,7 @@ import "/node_modules/react-grid-layout/css/styles.css";
 import "/node_modules/react-resizable/css/styles.css";
 import { api } from "@/utils/api";
 import { Heatmap } from "@/components/Dashboard/Heatmap";
+import { OverTimeGraph } from "@/components/Dashboard/OverTimeGraph";
 
 const Dashboard: React.FC = () => {
   const { data: session, status } = useSession();
@@ -136,10 +137,13 @@ const Dashboard: React.FC = () => {
                 f
               </div>
               <div
-                className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
+                className="flex flex-col gap-8 rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
                 key="h"
               >
-                h
+                <div className="h-6 w-full">Pages Read Over Time</div>
+                <div className="flex h-[calc(100%-4rem)] w-full items-center justify-center">
+                  <OverTimeGraph></OverTimeGraph>
+                </div>
               </div>
             </ResponsiveGridLayout>
           </div>
