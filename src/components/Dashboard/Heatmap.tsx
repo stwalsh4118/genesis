@@ -6,7 +6,6 @@ import {
   generateHeatmapColor,
   getDatesPreviousYear,
   groupDatesByWeek,
-  groupEventsByDay,
   populateMonths,
 } from "@/utils/dashboard_utils";
 
@@ -21,15 +20,6 @@ export const Heatmap: React.FC<HeatmapProps> = ({ Events }) => {
   const [months, setMonths] = useState<string[]>([]);
   const [pagesRead, setPagesRead] = useState<Map<string, number>>(new Map());
   const generateFakeEvents = api.events.addFakeEvents.useMutation();
-  const { data: events } = api.events.getEvents.useQuery();
-
-  useEffect(() => {
-    if (events) {
-      const groupedEvents = groupEventsByDay(events);
-      const aggregatedPages = aggregatePagesRead(groupedEvents);
-      setPagesRead(aggregatedPages);
-    }
-  }, [events]);
 
   useEffect(() => {
     if (dates) {

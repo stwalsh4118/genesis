@@ -1,5 +1,4 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { groupEventsByDay } from "@/components/Dashboard/Heatmap";
 import { type PagesReadEventData } from "./events";
 
 export const userDashboardRouter = createTRPCRouter({
