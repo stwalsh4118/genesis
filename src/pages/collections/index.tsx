@@ -259,7 +259,7 @@ const Collections: React.FC = () => {
                     <BookDisplay
                       key={index}
                       expanded={expandedBook === book.id}
-                      expandable={true}
+                      expandable={false}
                       expandDisplay={setExpandedBook}
                       bookId={book.id}
                       leftSlot={
@@ -312,11 +312,11 @@ const Collections: React.FC = () => {
                                 </div>
                               ) : null}
                             </div>
-                            <BookDisplay.ExpandBookButton
+                            {/* <BookDisplay.ExpandBookButton
                               setExpanded={setExpandedBook}
                               bookId={book.id}
                               expanded={expandedBook === book.id}
-                            ></BookDisplay.ExpandBookButton>
+                            ></BookDisplay.ExpandBookButton> */}
                           </div>
                         </div>
                       }

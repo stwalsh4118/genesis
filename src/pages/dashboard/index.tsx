@@ -29,8 +29,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     setInterval(() => {
       setLoaded(true);
-      // console.log("loaded");
-    }, 500);
+    }, 700);
   }, [session]);
 
   if (!session) return <></>;

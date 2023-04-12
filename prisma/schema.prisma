@@ -51,6 +51,7 @@ model User {
   sessions      Session[]
   collections  Collection[]
   events        Event[]
+  groups       Group[]
 }
 
 model VerificationToken {
@@ -82,6 +83,8 @@ model Book {
   @@unique([userId, title, author])
 }
 
+
+
 model Collection {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -92,6 +95,46 @@ model Collection {
   books     Book[]
 
   @@unique([userId, name])
+}
+
+model Group {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  users     User[]
+  groupCollections GroupCollection[]
+}
+
+model GroupCollection {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  groupId   String
+  group     Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  books     GroupBook[]
+
+  @@unique([groupId, name])
+}
+
+model GroupBook {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String
+  author    String
+  pages     Int?
+  pagesRead Int? @default(0)
+  isbn10    String?
+  isbn13    String?
+  coverUrl  String?
+  rating    Int?
+  review    String?
+  read      Boolean  @default(false)
+  groupCollection GroupCollection[]
+
+  @@unique([title, author])
 }
 
 model Event {

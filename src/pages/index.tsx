@@ -24,14 +24,7 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <div className="relative flex-1">
-        <Image
-          src="/home.jpg"
-          alt="guy with books"
-          fill
-          style={{ objectFit: "cover" }}
-        ></Image>
-      </div>
+      <div className="relative flex-1">{/* put threejs stuff here */}</div>
     </>
   );
 };

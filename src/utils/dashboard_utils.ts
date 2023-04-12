@@ -127,7 +127,6 @@ export const aggregatePagesRead = (
     const pagesRead = onlyPagesReadEvents.reduce((acc, event) => {
       return acc + (event.eventData as unknown as PagesReadEventData).pagesRead;
     }, 0);
-    console.log(pagesRead);
     aggregatedEventMap.set(date, pagesRead);
   }
 
