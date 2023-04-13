@@ -53,9 +53,20 @@ const Search: React.FC = () => {
       toast.error("Failed to add book to your collection");
     },
   });
+  const addBookToGroup =
+    api.group_collections.addBookToGroupCollection.useMutation({
+      onSuccess: () => {
+        toast.success("Book added to group collection");
+      },
+      onError: () => {
+        toast.error("Failed to add book to group collection");
+      },
+    });
+
   const { data: collections } = api.user_collections.getCollections.useQuery({
     userId: session?.user.id ? session.user.id : "",
   });
+  const { data: groups } = api.group.getGroups.useQuery();
 
   const handleSearch = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -174,6 +185,7 @@ const Search: React.FC = () => {
                                   />
                                   <BookDisplay.AddBookButton
                                     addBook={addBook}
+                                    addBookToGroup={addBookToGroup}
                                     book={book}
                                     defaultCollectionId={
                                       collections?.collections.find(
@@ -186,6 +198,7 @@ const Search: React.FC = () => {
                                           )?.id
                                         : ""
                                     }
+                                    groups={groups}
                                   />
                                   <div className="flex flex-col items-end">
                                     <BookDisplay.ISBN10
@@ -224,6 +237,7 @@ const Search: React.FC = () => {
                               />
                               <BookDisplay.AddBookButton
                                 addBook={addBook}
+                                addBookToGroup={addBookToGroup}
                                 book={query.data}
                                 defaultCollectionId={
                                   collections?.collections.find(
@@ -235,6 +249,7 @@ const Search: React.FC = () => {
                                       )?.id
                                     : ""
                                 }
+                                groups={groups}
                               />
                               <div className="flex flex-col items-end">
                                 <BookDisplay.ISBN10

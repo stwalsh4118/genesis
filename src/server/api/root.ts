@@ -3,6 +3,8 @@ import { userBooksRouter } from "./routers/user_books";
 import { userCollectionsRouter } from "./routers/user_collections";
 import { userDashboardRouter } from "./routers/user_dashboard";
 import { eventsRouter } from "./routers/events";
+import { groupCollectionsRouter } from "./routers/group_collections";
+import { groupRouter } from "./routers/group";
 
 /**
  * This is the primary router for your server.
@@ -14,6 +16,8 @@ export const appRouter = createTRPCRouter({
   user_collections: userCollectionsRouter,
   user_dashboard: userDashboardRouter,
   events: eventsRouter,
+  group_collections: groupCollectionsRouter,
+  group: groupRouter,
 });
 
 // export type definition of API

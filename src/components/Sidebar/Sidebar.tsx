@@ -52,6 +52,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ loaded }) => {
             >
               Collections
             </div>
+            <div
+              className="cursor-pointer hover:bg-sage-400"
+              onClick={() => void router.push("/groups")}
+            >
+              Groups
+            </div>
           </div>
           <div className="mx-2 flex flex-col gap-2 self-stretch p-4 text-center">
             <div className="cursor-pointer hover:bg-sage-400">

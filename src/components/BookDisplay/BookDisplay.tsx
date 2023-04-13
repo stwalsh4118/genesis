@@ -12,6 +12,8 @@ import {
 import { StarIcon as StarOutlineIcon } from "@heroicons/react/24/outline";
 import { api } from "@/utils/api";
 import { toast } from "react-toastify";
+import { useOutsideAlerter } from "@/pages/collections";
+import { Group } from "@prisma/client";
 
 interface BookDisplayProps {
   leftSlot?: ReactNode;
@@ -32,8 +34,10 @@ interface BookDisplayComponents {
   ISBN13: React.FC<{ isbn13: string }>;
   AddBookButton: React.FC<{
     addBook: UseTRPCMutationResult<any, any, any, any>;
+    addBookToGroup: UseTRPCMutationResult<any, any, any, any>;
     book: Book;
     defaultCollectionId: string | undefined;
+    groups?: Group[];
   }>;
   ExpandBookButton: React.FC<{
     setExpanded: React.Dispatch<React.SetStateAction<string>>;
@@ -79,11 +83,11 @@ export const BookDisplay: React.FC<BookDisplayProps> &
         className={`group flex h-[12rem] w-full shrink-0 justify-between rounded-sm bg-sage-200 p-4 text-sage-800 transition-all`}
       >
         {/* left */}
-        <div className="grow basis-[33%]">{leftSlot}</div>
+        <div className="grow basis-[33%] overflow-hidden">{leftSlot}</div>
         {/* middle */}
-        <div className="grow basis-[33%]">{middleSlot}</div>
+        <div className="grow basis-[33%] overflow-hidden">{middleSlot}</div>
         {/* right */}
-        <div className="grow basis-[33%]">{rightSlot}</div>
+        <div className="grow basis-[33%] overflow-hidden">{rightSlot}</div>
       </div>
     </div>
   );
@@ -218,23 +222,87 @@ const BookDisplayISBN13: React.FC<{ isbn13: string }> = ({ isbn13 }) => {
 
 const BookDisplayAddButton: React.FC<{
   addBook: UseTRPCMutationResult<any, any, any, any>;
+  addBookToGroup: UseTRPCMutationResult<any, any, any, any>;
   book: Book;
   defaultCollectionId: string | undefined;
-}> = ({ addBook, book, defaultCollectionId }) => {
+  groups?: Group[];
+}> = ({ addBook, addBookToGroup, book, defaultCollectionId, groups }) => {
+  const dropdownRef = useRef(null);
+  const [dropdownState, setDropdownState] = useState<
+    "open" | "closed" | "group"
+  >("closed");
+  useOutsideAlerter(dropdownRef, () => {
+    setDropdownState("closed");
+  });
+
   return (
     <>
-      <button
-        className="rounded-sm bg-sage-800 p-1 text-sm text-sage-200"
-        onClick={(e) => {
-          addBook.mutate({
-            book: book,
-            collectionId: defaultCollectionId,
-          });
-          e.stopPropagation();
-        }}
-      >
-        Add Book
-      </button>
+      <div className="relative flex" ref={dropdownRef}>
+        <button
+          className="rounded-sm bg-sage-800 p-1 text-sm text-sage-200"
+          onClick={(e) => {
+            if (dropdownState === "open" || dropdownState === "group") {
+              setDropdownState("closed");
+            } else {
+              setDropdownState("open");
+            }
+          }}
+        >
+          Add Book
+        </button>
+        {dropdownState === "open" ? (
+          <div className="absolute top-7 -left-[calc(10rem-100%)] w-40">
+            <div className="flex flex-col divide-y-[1px] divide-sage-800/20 border border-sage-800/20 text-center shadow-sm">
+              <div className="bg-sage-300 p-1">
+                <div
+                  className="button h-full w-full"
+                  onClick={() => {
+                    addBook.mutate({ book });
+                    setDropdownState("closed");
+                  }}
+                >
+                  To Collection
+                </div>
+              </div>
+              {groups?.length ? (
+                <div className="bg-sage-300 p-1">
+                  <div
+                    className="button h-full w-full"
+                    onClick={() => {
+                      setDropdownState("group");
+                    }}
+                  >
+                    To Group Collection
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : dropdownState === "group" ? (
+          <div className="absolute top-7 -left-[calc(10rem-100%)] w-40">
+            <div className="flex flex-col divide-y-[1px] divide-sage-800/20 border border-sage-800/20 text-center shadow-sm">
+              {groups?.map((group) => {
+                return (
+                  <div className="bg-sage-300 p-1" key={group.id}>
+                    <div
+                      className="button h-full w-full"
+                      onClick={() => {
+                        addBookToGroup.mutate({
+                          book,
+                          groupId: group.id,
+                        });
+                        setDropdownState("closed");
+                      }}
+                    >
+                      {group.name}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+      </div>
     </>
   );
 };

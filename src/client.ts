@@ -1,4 +1,6 @@
 import axios from "axios";
+import { api } from "./utils/api";
+import { toast } from "react-toastify";
 
 export interface Book {
   title: string;
@@ -97,4 +99,84 @@ export const getBookByTitle = async (title: string) => {
   });
 
   return books;
+};
+
+export const useAddBooksToCollection = () => {
+  const addBooksToCollection =
+    api.user_collections.addBooksToCollection.useMutation({
+      onSuccess: () => {
+        toast.success("Book added to collection");
+      },
+      onError: () => {
+        toast.error("Failed to add book to collection");
+      },
+    });
+
+  return addBooksToCollection;
+};
+
+export const useRemoveBooksFromCollection = () => {
+  const removeBooksFromCollection =
+    api.user_collections.removeBooksFromCollection.useMutation({
+      onSuccess: () => {
+        toast.success("Book removed from collection");
+      },
+      onError: () => {
+        toast.error("Failed to remove book from collection");
+      },
+    });
+
+  return removeBooksFromCollection;
+};
+
+export const useDeleteBook = () => {
+  const deleteBook = api.user_books.deleteBook.useMutation({
+    onSuccess: () => {
+      toast.success("Book deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete book");
+    },
+  });
+
+  return deleteBook;
+};
+
+export const useUpdateBook = () => {
+  const updateBook = api.user_books.updateBook.useMutation({
+    onSuccess: () => {
+      toast.success("Book updated");
+    },
+    onError: () => {
+      toast.error("Failed to update book");
+    },
+  });
+
+  return updateBook;
+};
+
+export const useAddCollection = () => {
+  const addCollection = api.user_collections.addCollection.useMutation({
+    onSuccess: () => {
+      toast.success("Collection added");
+    },
+    onError: () => {
+      toast.error("Failed to add collection");
+    },
+  });
+
+  return addCollection;
+};
+
+export const useDeleteCollection = () => {
+  const deleteCollection = api.user_collections.deleteCollection.useMutation({
+    onSuccess: () => {
+      toast.success("Collection deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete collection");
+    },
+  });
+
+  return deleteCollection;
 };

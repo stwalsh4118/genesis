@@ -10,7 +10,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 import Fuse from "fuse.js";
-import type { Book } from "@prisma/client";
+import type { Book, GroupBook } from "@prisma/client";
 
 import { toast } from "react-toastify";
 import {
@@ -21,6 +21,7 @@ import {
   useRemoveBooksFromCollection,
   useUpdateBook,
 } from "@/client";
+import { useRouter } from "next/router";
 
 export const useOutsideAlerter = (
   ref: RefObject<HTMLDivElement>,
@@ -45,12 +46,12 @@ export const useOutsideAlerter = (
   }, [ref]);
 };
 
-const Collections: React.FC = () => {
+const GroupCollections: React.FC = () => {
   //state for storing which dropdown is open, use book id since it's unique
   const [selectedDropdown, setSelectedDropdown] = useState("");
   const [expandedBook, setExpandedBook] = useState("");
   const [selectedCollection, setSelectedCollection] = useState("All");
-  const [searchResults, setSearchResults] = useState<Book[]>([]);
+  const [searchResults, setSearchResults] = useState<GroupBook[]>([]);
   const [addingCollection, setAddingCollection] = useState(false);
   const [deletingCollection, setDeletingCollection] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -61,17 +62,28 @@ const Collections: React.FC = () => {
   const deleteBook = useDeleteBook();
   const updateBook = useUpdateBook();
   const deleteCollection = useDeleteCollection();
+  const router = useRouter();
 
   const options = {
     includeScore: true,
     keys: ["title", "author"],
   };
 
+  const {
+    data: group,
+    error: groupError,
+    isLoading: groupLoading,
+  } = api.group.getGroup.useQuery({
+    id: router.query.id as string,
+  });
+
   const { data } = useSession();
 
-  const { data: collections } = api.user_collections.getCollections.useQuery({
-    userId: data?.user.id ? data.user.id : "",
-  });
+  useOutsideAlerter(dropdown, () => setSelectedDropdown(""));
+
+  if (groupLoading) return <div>loading</div>;
+  if (groupError) return <div>error</div>;
+  if (!group) return <div>no group</div>;
 
   const handleDropdownSelect = (id: string) => {
     if (selectedDropdown === id) {
@@ -93,8 +105,6 @@ const Collections: React.FC = () => {
     formRef.current?.reset();
   };
 
-  useOutsideAlerter(dropdown, () => setSelectedDropdown(""));
-
   return (
     <>
       <div className="flex min-h-screen w-full justify-center p-4">
@@ -103,8 +113,8 @@ const Collections: React.FC = () => {
           {/* collections tabs */}
           <div className="group flex h-10 w-full items-center justify-between bg-sage-600">
             <div className="flex h-full w-full divide-x-[1px] divide-sage-600 rounded-sm border-b-[1px] border-sage-900/20 px-2 pt-2 text-sage-800">
-              {collections
-                ? collections.collections.map((collection) => {
+              {group
+                ? group.groupCollections.map((collection) => {
                     return (
                       <div
                         key={collection.name}
@@ -183,8 +193,8 @@ const Collections: React.FC = () => {
               autoComplete="off"
               placeholder="Search for books"
               onChange={(e) => {
-                if (!collections) return;
-                const books = collections.collections.find(
+                if (!group) return;
+                const books = group.groupCollections.find(
                   (collection) => collection.name === selectedCollection
                 )?.books;
                 if (!books) return;
@@ -197,13 +207,13 @@ const Collections: React.FC = () => {
           </div>
           {/* results area */}
           <div className="h-full w-full p-4">
-            {collections?.collections.find(
+            {group?.groupCollections.find(
               (collection) => collection.name === selectedCollection
             ) ? (
               <div className="flex h-full max-h-[calc(100vh-12rem)] w-full flex-col divide-y divide-sage-400 overflow-y-scroll rounded-sm bg-sage-300 pl-2">
                 {(searchResults.length !== 0
                   ? searchResults
-                  : collections?.collections.find(
+                  : group?.groupCollections.find(
                       (collection) => collection.name === selectedCollection
                     )!.books
                 ).map((book, index) => {
@@ -240,8 +250,8 @@ const Collections: React.FC = () => {
                                   }
                                   className="absolute top-6 flex h-[8.5rem] w-full flex-col divide-y-[1px] divide-sage-500/80 rounded-b-sm bg-sage-400/50"
                                 >
-                                  {collections
-                                    ? collections.collections.map(
+                                  {group
+                                    ? group.groupCollections.map(
                                         (collection) => {
                                           return (
                                             <div
@@ -288,7 +298,7 @@ const Collections: React.FC = () => {
 
                                 if (selectedCollection !== "All") {
                                   const currentCollection =
-                                    collections?.collections.find(
+                                    group?.groupCollections.find(
                                       (collection) =>
                                         collection.name === selectedCollection
                                     );
@@ -339,4 +349,4 @@ const Collections: React.FC = () => {
   );
 };
 
-export default Collections;
+export default GroupCollections;
