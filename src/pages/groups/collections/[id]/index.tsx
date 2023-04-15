@@ -104,7 +104,6 @@ const GroupCollections: React.FC = () => {
     setAddingCollection(false);
     formRef.current?.reset();
   };
-
   return (
     <>
       <div className="flex min-h-screen w-full justify-center p-4">
