@@ -21,6 +21,7 @@ import {
   useRemoveBooksFromCollection,
   useUpdateBook,
 } from "@/client";
+import { Dropdown } from "@/components/Dropdown";
 
 export const useOutsideAlerter = (
   ref: RefObject<HTMLDivElement>,
@@ -53,6 +54,10 @@ const Collections: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [addingCollection, setAddingCollection] = useState(false);
   const [deletingCollection, setDeletingCollection] = useState(false);
+  const [sortType, setSortType] = useState<"Time Added" | "Title">("Title");
+  const [sortState, setSortState] = useState<"Ascending" | "Descending">(
+    "Ascending"
+  );
   const formRef = useRef<HTMLFormElement>(null);
   const dropdown = useRef<HTMLDivElement>(null);
   const addBooksToCollection = useAddBooksToCollection();
@@ -94,6 +99,25 @@ const Collections: React.FC = () => {
   };
 
   useOutsideAlerter(dropdown, () => setSelectedDropdown(""));
+
+  function sortBooks(
+    sortState: string,
+    sortType: string
+  ): ((a: Book, b: Book) => number) | undefined {
+    if (sortState === "Ascending") {
+      if (sortType === "Title") {
+        return (a, b) => a.title.localeCompare(b.title);
+      } else if (sortType === "Time Added") {
+        return (a, b) => (a.createdAt < b.createdAt ? 1 : -1);
+      }
+    } else if (sortState === "Descending") {
+      if (sortType === "Title") {
+        return (a, b) => b.title.localeCompare(a.title);
+      } else if (sortType === "Time Added") {
+        return (a, b) => (a.createdAt > b.createdAt ? 1 : -1);
+      }
+    }
+  }
 
   return (
     <>
@@ -176,6 +200,27 @@ const Collections: React.FC = () => {
           <div className="flex h-16 w-full items-center justify-between p-4">
             {/* tags */}
             {/* <div className="h-10 w-52 rounded-sm border border-sage-200/50 bg-sage-100/50 shadow-inner"></div> */}
+            {/* sorting */}
+            <div className="flex gap-3">
+              <div className=" h-10 w-32 rounded-sm bg-sage-400 shadow-sm">
+                <Dropdown
+                  options={["Title", "Time Added"]}
+                  value={sortType}
+                  onChange={(e) => {
+                    setSortType(e as "Title" | "Time Added");
+                  }}
+                ></Dropdown>
+              </div>
+              <div className="h-10 w-32 rounded-sm bg-sage-400 shadow-sm">
+                <Dropdown
+                  options={["Ascending", "Descending"]}
+                  value={sortState}
+                  onChange={(e) => {
+                    setSortState(e as "Ascending" | "Descending");
+                  }}
+                ></Dropdown>
+              </div>
+            </div>
             {/* placeholder */}
             <div></div>
             <input
@@ -206,130 +251,134 @@ const Collections: React.FC = () => {
                   : collections?.collections.find(
                       (collection) => collection.name === selectedCollection
                     )!.books
-                ).map((book, index) => {
-                  return (
-                    <BookDisplay
-                      key={index}
-                      expanded={expandedBook === book.id}
-                      expandable={false}
-                      expandDisplay={setExpandedBook}
-                      bookId={book.id}
-                      leftSlot={
-                        <div className="flex h-full justify-between">
-                          <div className="h-[12rem]">
-                            <BookDisplay.Image
-                              imageUrl={book.coverUrl ? book.coverUrl : ""}
-                            />
-                          </div>
-                          {/* dropdown */}
-                          <div className="flex h-full flex-col justify-between">
-                            <div className="relative flex h-6 w-36 cursor-pointer select-none text-sm text-sage-800 ">
-                              <div
-                                className="flex h-full w-full items-center justify-center bg-sage-500/50 active:bg-sage-500/80"
-                                onClick={() => handleDropdownSelect(book.id)}
-                              >
-                                <div className="">Add to Collection</div>
-                                <ChevronDownIcon className="ml-2 h-4 w-4" />
-                              </div>
-                              {selectedDropdown === book.id ? (
-                                <div
-                                  ref={
-                                    selectedDropdown === book.id
-                                      ? dropdown
-                                      : null
-                                  }
-                                  className="absolute top-6 flex h-[8.5rem] w-full flex-col divide-y-[1px] divide-sage-500/80 rounded-b-sm bg-sage-400/50"
-                                >
-                                  {collections
-                                    ? collections.collections.map(
-                                        (collection) => {
-                                          return (
-                                            <div
-                                              key={collection.name}
-                                              className="button flex h-full w-full select-none items-center justify-center rounded-b-sm border-sage-800 px-2 text-sm text-sage-900 hover:bg-sage-400/30 active:bg-sage-400/80"
-                                              onClick={() => {
-                                                addBooksToCollection.mutate({
-                                                  bookIds: book.id,
-                                                  collectionId: collection.id,
-                                                });
-                                                setSelectedDropdown("");
-                                              }}
-                                            >
-                                              {collection.name}
-                                            </div>
-                                          );
-                                        }
-                                      )
-                                    : null}
-                                </div>
-                              ) : null}
+                )
+                  .sort(sortBooks(sortState, sortType))
+                  .map((book, index) => {
+                    return (
+                      <BookDisplay
+                        key={index}
+                        expanded={expandedBook === book.id}
+                        expandable={false}
+                        expandDisplay={setExpandedBook}
+                        bookId={book.id}
+                        leftSlot={
+                          <div className="flex h-full justify-between">
+                            <div className="h-[12rem]">
+                              <BookDisplay.Image
+                                imageUrl={book.coverUrl ? book.coverUrl : ""}
+                              />
                             </div>
-                            {/* <BookDisplay.ExpandBookButton
+                            {/* dropdown */}
+                            <div className="flex h-full flex-col justify-between">
+                              <div className="relative flex h-6 w-36 cursor-pointer select-none text-sm text-sage-800 ">
+                                <div
+                                  className="flex h-full w-full items-center justify-center bg-sage-500/50 active:bg-sage-500/80"
+                                  onClick={() => handleDropdownSelect(book.id)}
+                                >
+                                  <div className="">Add to Collection</div>
+                                  <ChevronDownIcon className="ml-2 h-4 w-4" />
+                                </div>
+                                {selectedDropdown === book.id ? (
+                                  <div
+                                    ref={
+                                      selectedDropdown === book.id
+                                        ? dropdown
+                                        : null
+                                    }
+                                    className="absolute top-6 flex h-[8.5rem] w-full flex-col divide-y-[1px] divide-sage-500/80 rounded-b-sm bg-sage-400/50"
+                                  >
+                                    {collections
+                                      ? collections.collections.map(
+                                          (collection) => {
+                                            return (
+                                              <div
+                                                key={collection.name}
+                                                className="button flex h-full w-full select-none items-center justify-center rounded-b-sm border-sage-800 px-2 text-sm text-sage-900 hover:bg-sage-400/30 active:bg-sage-400/80"
+                                                onClick={() => {
+                                                  addBooksToCollection.mutate({
+                                                    bookIds: book.id,
+                                                    collectionId: collection.id,
+                                                  });
+                                                  setSelectedDropdown("");
+                                                }}
+                                              >
+                                                {collection.name}
+                                              </div>
+                                            );
+                                          }
+                                        )
+                                      : null}
+                                  </div>
+                                ) : null}
+                              </div>
+                              {/* <BookDisplay.ExpandBookButton
                               setExpanded={setExpandedBook}
                               bookId={book.id}
                               expanded={expandedBook === book.id}
                             ></BookDisplay.ExpandBookButton> */}
+                            </div>
                           </div>
-                        </div>
-                      }
-                      middleSlot={
-                        <div className="flex h-full flex-col justify-between text-center">
-                          <BookDisplay.Title title={book.title} />
-                          <BookDisplay.Author author={book.author} />
-                        </div>
-                      }
-                      rightSlot={
-                        <div className="flex h-full flex-col items-end justify-between">
-                          <div className="flex w-full items-center justify-between">
-                            <TrashIcon
-                              className="button h-6 w-6 text-red-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                              onClick={() => {
-                                if (!selectedCollection) return;
+                        }
+                        middleSlot={
+                          <div className="flex h-full flex-col justify-between text-center">
+                            <BookDisplay.Title title={book.title} />
+                            <BookDisplay.Author author={book.author} />
+                          </div>
+                        }
+                        rightSlot={
+                          <div className="flex h-full flex-col items-end justify-between">
+                            <div className="flex w-full items-center justify-between">
+                              <TrashIcon
+                                className="button h-6 w-6 text-red-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                                onClick={() => {
+                                  if (!selectedCollection) return;
 
-                                if (selectedCollection !== "All") {
-                                  const currentCollection =
-                                    collections?.collections.find(
-                                      (collection) =>
-                                        collection.name === selectedCollection
-                                    );
+                                  if (selectedCollection !== "All") {
+                                    const currentCollection =
+                                      collections?.collections.find(
+                                        (collection) =>
+                                          collection.name === selectedCollection
+                                      );
 
-                                  if (!currentCollection) return;
+                                    if (!currentCollection) return;
 
-                                  removeBooksFromCollection.mutate({
-                                    bookIds: book.id,
-                                    collectionId: currentCollection.id,
-                                  });
-                                } else {
-                                  deleteBook.mutate({ bookId: book.id });
-                                }
-                              }}
-                            ></TrashIcon>
-                            <div className="flex flex-col justify-end gap-1">
-                              <BookDisplay.Pages
-                                pages={book.pages ? book.pages : 0}
-                                bookId={book.id}
-                                readPages={book.pagesRead ? book.pagesRead : 0}
+                                    removeBooksFromCollection.mutate({
+                                      bookIds: book.id,
+                                      collectionId: currentCollection.id,
+                                    });
+                                  } else {
+                                    deleteBook.mutate({ bookId: book.id });
+                                  }
+                                }}
+                              ></TrashIcon>
+                              <div className="flex flex-col justify-end gap-1">
+                                <BookDisplay.Pages
+                                  pages={book.pages ? book.pages : 0}
+                                  bookId={book.id}
+                                  readPages={
+                                    book.pagesRead ? book.pagesRead : 0
+                                  }
+                                />
+                                <BookDisplay.StarReview
+                                  updateBook={updateBook}
+                                  bookId={book.id}
+                                  initialRating={book.rating ? book.rating : 0}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end">
+                              <BookDisplay.ISBN10
+                                isbn10={book.isbn10 ? book.isbn10 : ""}
                               />
-                              <BookDisplay.StarReview
-                                updateBook={updateBook}
-                                bookId={book.id}
-                                initialRating={book.rating ? book.rating : 0}
+                              <BookDisplay.ISBN13
+                                isbn13={book.isbn13 ? book.isbn13 : ""}
                               />
                             </div>
                           </div>
-                          <div className="flex flex-col items-end">
-                            <BookDisplay.ISBN10
-                              isbn10={book.isbn10 ? book.isbn10 : ""}
-                            />
-                            <BookDisplay.ISBN13
-                              isbn13={book.isbn13 ? book.isbn13 : ""}
-                            />
-                          </div>
-                        </div>
-                      }
-                    ></BookDisplay>
-                  );
-                })}
+                        }
+                      ></BookDisplay>
+                    );
+                  })}
               </div>
             ) : null}
           </div>
