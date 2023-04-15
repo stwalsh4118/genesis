@@ -54,7 +54,9 @@ const Collections: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [addingCollection, setAddingCollection] = useState(false);
   const [deletingCollection, setDeletingCollection] = useState(false);
-  const [sortType, setSortType] = useState<"Time Added" | "Title">("Title");
+  const [sortType, setSortType] = useState<"Time Added" | "Title" | "Release">(
+    "Title"
+  );
   const [sortState, setSortState] = useState<"Ascending" | "Descending">(
     "Ascending"
   );
@@ -106,15 +108,33 @@ const Collections: React.FC = () => {
   ): ((a: Book, b: Book) => number) | undefined {
     if (sortState === "Ascending") {
       if (sortType === "Title") {
-        return (a, b) => a.title.localeCompare(b.title);
+        return (a, b) =>
+          a.title.localeCompare(b.title, "en", { sensitivity: "base" });
       } else if (sortType === "Time Added") {
         return (a, b) => (a.createdAt < b.createdAt ? 1 : -1);
+      } else if (sortType === "Release") {
+        return (a, b) => {
+          if (!a.isbn10 || !b.isbn10) {
+            return 1;
+          } else {
+            return a.isbn10 < b.isbn10 ? 1 : -1;
+          }
+        };
       }
     } else if (sortState === "Descending") {
       if (sortType === "Title") {
-        return (a, b) => b.title.localeCompare(a.title);
+        return (a, b) =>
+          b.title.localeCompare(a.title, "en", { sensitivity: "base" });
       } else if (sortType === "Time Added") {
         return (a, b) => (a.createdAt > b.createdAt ? 1 : -1);
+      } else if (sortType === "Release") {
+        return (a, b) => {
+          if (!a.isbn10 || !b.isbn10) {
+            return 1;
+          } else {
+            return a.isbn10 > b.isbn10 ? 1 : -1;
+          }
+        };
       }
     }
   }
@@ -204,10 +224,10 @@ const Collections: React.FC = () => {
             <div className="flex gap-3">
               <div className=" h-10 w-32 rounded-sm bg-sage-400 shadow-sm">
                 <Dropdown
-                  options={["Title", "Time Added"]}
+                  options={["Title", "Time Added", "Release"]}
                   value={sortType}
                   onChange={(e) => {
-                    setSortType(e as "Title" | "Time Added");
+                    setSortType(e as "Title" | "Time Added" | "Release");
                   }}
                 ></Dropdown>
               </div>
