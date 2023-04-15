@@ -1,4 +1,4 @@
-import { getBookByIsbn, getBookByTitle } from "@/client";
+import { getBookByAuthor, getBookByIsbn, getBookByTitle } from "@/client";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
@@ -36,6 +36,11 @@ const Search: React.FC = () => {
         queryKey: ["title", formData],
         queryFn: () => getBookByTitle(formData),
         enabled: searchType === "Title" && formData.length > 0,
+      },
+      {
+        queryKey: ["author", formData],
+        queryFn: () => getBookByAuthor(formData),
+        enabled: searchType === "Author" && formData.length > 0,
       },
     ],
   });

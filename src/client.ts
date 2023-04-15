@@ -101,6 +101,27 @@ export const getBookByTitle = async (title: string) => {
   return books;
 };
 
+export const getBookByAuthor = async (author: string) => {
+  const { data } = await axios.get<BookSearchResult>(
+    `https://openlibrary.org/search.json?author=${author}`
+  );
+
+  const books = data.docs.map((doc) => {
+    const book = {} as Book;
+
+    book.title = doc.title;
+    book.author = doc.author_name[0] ? doc.author_name[0] : "";
+    book.pages = doc.number_of_pages_median ? doc.number_of_pages_median : 0;
+    book.isbn10 = doc.isbn ? doc.isbn.find((isbn) => isbn.length === 10) : "";
+    book.isbn13 = doc.isbn ? doc.isbn.find((isbn) => isbn.length === 13) : "";
+    book.coverUrl = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
+
+    return book;
+  });
+
+  return books;
+};
+
 export const useAddBooksToCollection = () => {
   const addBooksToCollection =
     api.user_collections.addBooksToCollection.useMutation({
