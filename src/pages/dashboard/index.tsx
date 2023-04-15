@@ -120,9 +120,7 @@ const Dashboard: React.FC = () => {
               <div
                 className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
                 key="d"
-              >
-                d
-              </div>
+              ></div>
               <div
                 className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
                 key="e"
@@ -132,9 +130,7 @@ const Dashboard: React.FC = () => {
               <div
                 className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
                 key="f"
-              >
-                f
-              </div>
+              ></div>
               <div
                 className="flex flex-col gap-8 rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
                 key="h"
