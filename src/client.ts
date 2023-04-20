@@ -201,3 +201,16 @@ export const useDeleteCollection = () => {
 
   return deleteCollection;
 };
+
+export const useUpdateGroup = () => {
+  const updateGroup = api.group.updateGroup.useMutation({
+    onSuccess: () => {
+      toast.success("Group updated");
+    },
+    onError: () => {
+      toast.error("Failed to update group");
+    },
+  });
+
+  return updateGroup;
+};

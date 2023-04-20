@@ -41,4 +41,49 @@ export const groupRouter = createTRPCRouter({
 
     return groups;
   }),
+
+  addGroup: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const user = ctx.session.user;
+
+      const group = await ctx.prisma.group.create({
+        data: {
+          name: input.name,
+          users: {
+            connect: {
+              id: user.id,
+            },
+          },
+        },
+      });
+
+      return group;
+    }),
+
+  updateGroup: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string().optional(),
+        pinnedBook: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const group = await ctx.prisma.group.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          name: input.name,
+          pinnedBookId: input.pinnedBook,
+        },
+      });
+
+      return group;
+    }),
 });

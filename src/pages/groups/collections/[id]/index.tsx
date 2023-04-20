@@ -10,9 +10,8 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/solid";
 import Fuse from "fuse.js";
-import type { Book, GroupBook } from "@prisma/client";
+import type { GroupBook } from "@prisma/client";
 
-import { toast } from "react-toastify";
 import {
   useAddBooksToCollection,
   useAddCollection,
@@ -20,6 +19,7 @@ import {
   useDeleteCollection,
   useRemoveBooksFromCollection,
   useUpdateBook,
+  useUpdateGroup,
 } from "@/client";
 import { useRouter } from "next/router";
 
@@ -62,6 +62,7 @@ const GroupCollections: React.FC = () => {
   const deleteBook = useDeleteBook();
   const updateBook = useUpdateBook();
   const deleteCollection = useDeleteCollection();
+  const updateGroup = useUpdateGroup();
   const router = useRouter();
 
   const options = {
