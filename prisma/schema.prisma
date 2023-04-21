@@ -40,18 +40,18 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
+  id              String       @id @default(cuid())
+  name            String?
+  email           String?      @unique
+  emailVerified   DateTime?
+  image           String?
   dashboardLayout Json?
-  accounts      Account[]
-  books         Book[]
-  sessions      Session[]
-  collections  Collection[]
-  events        Event[]
-  groups       Group[]
+  accounts        Account[]
+  books           Book[]
+  collections     Collection[]
+  events          Event[]
+  sessions        Session[]
+  groups          Group[]      @relation("GroupToUser")
 }
 
 model VerificationToken {
@@ -63,27 +63,25 @@ model VerificationToken {
 }
 
 model Book {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  title     String
-  author    String
-  pages     Int?
-  pagesRead Int? @default(0)
-  isbn10    String?
-  isbn13    String?
-  coverUrl  String?
-  rating    Int?
-  review    String?
-  read      Boolean  @default(false)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  collection Collection[]
+  id         String       @id @default(cuid())
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  title      String
+  author     String
+  pages      Int?
+  isbn10     String?
+  isbn13     String?
+  coverUrl   String?
+  read       Boolean      @default(false)
+  userId     String
+  pagesRead  Int?         @default(0)
+  rating     Int?
+  review     String?
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collection Collection[] @relation("BookToCollection")
 
   @@unique([userId, title, author])
 }
-
-
 
 model Collection {
   id        String   @id @default(cuid())
@@ -92,50 +90,50 @@ model Collection {
   name      String
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  books     Book[]
+  books     Book[]   @relation("BookToCollection")
 
   @@unique([userId, name])
 }
 
 model Group {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String
-  pinnedBookId String?
-  pinnedBook GroupBook? @relation(fields: [pinnedBookId], references: [id], onDelete: Cascade)
-  users     User[]
+  id               String            @id @default(cuid())
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  name             String
+  pinnedBookId     String?
+  pinnedBook       GroupBook?        @relation(fields: [pinnedBookId], references: [id])
   groupCollections GroupCollection[]
+  users            User[]            @relation("GroupToUser")
 }
 
 model GroupCollection {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   name      String
   groupId   String
-  group     Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  books     GroupBook[]
+  group     Group       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  books     GroupBook[] @relation("GroupBookToGroupCollection")
 
   @@unique([groupId, name])
 }
 
 model GroupBook {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  title     String
-  author    String
-  pages     Int?
-  pagesRead Int? @default(0)
-  isbn10    String?
-  isbn13    String?
-  coverUrl  String?
-  rating    Int?
-  review    String?
-  pinnedGroups Group[]
-  read      Boolean  @default(false)
-  groupCollection GroupCollection[]
+  id              String            @id @default(cuid())
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  title           String
+  author          String
+  pages           Int?
+  pagesRead       Int?              @default(0)
+  isbn10          String?
+  isbn13          String?
+  coverUrl        String?
+  rating          Int?
+  review          String?
+  read            Boolean           @default(false)
+  pinnedGroups    Group[]
+  groupCollection GroupCollection[] @relation("GroupBookToGroupCollection")
 
   @@unique([title, author])
 }

@@ -37,6 +37,17 @@ export const groupRouter = createTRPCRouter({
           },
         },
       },
+      select: {
+        id: true,
+        name: true,
+        pinnedBook: true,
+        users: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     return groups;
