@@ -86,7 +86,7 @@ const Search: React.FC = () => {
     <>
       <div className="flex min-h-screen w-full justify-center">
         {/* search wrapper */}
-        <div className="flex h-full w-[70%] flex-col">
+        <div className="flex h-full w-full flex-col p-2 md:w-[70%]">
           {/* search bar */}
           <div className="relative w-full">
             {(!query?.every((query) => query.isFetching) &&

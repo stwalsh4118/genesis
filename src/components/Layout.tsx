@@ -27,18 +27,21 @@ function getBreakPoint(windowWidth: number): number {
 }
 
 function useWindowSize() {
-  const isWindowClient = typeof window === "object";
+  const [isWindowClient, setIsWindowClient] = useState(false);
+  const [windowSize, setWindowSize] = useState(getBreakPoint(1024));
 
-  const [windowSize, setWindowSize] = useState(
-    isWindowClient
-      ? getBreakPoint(window.innerWidth) //👈
-      : undefined
-  );
+  useEffect(() => {
+    //only execute all the code below in client side
+    if (typeof window === "object") {
+      setIsWindowClient(true);
+      setWindowSize(getBreakPoint(window.innerWidth));
+    }
+  });
 
   useEffect(() => {
     //a handler which will be called on change of the screen resize
     function setSize() {
-      setWindowSize(getBreakPoint(window.innerWidth)); //👈
+      setWindowSize(getBreakPoint(window.innerWidth));
       console.log("SETTING WINDOW SIZE", getBreakPoint(window.innerWidth));
     }
 
@@ -101,14 +104,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex h-screen w-full overflow-hidden bg-sage-100">
-        <div className="flex w-full flex-col lg:flex-row">
+        <div className="flex w-full flex-col md:flex-row">
           {/* sidebars */}
-          {windowSize >= 1024 ? (
+          {windowSize > 768 ? (
             <div
               className={`flex max-h-screen w-full min-w-[10rem] shrink-0 select-none border-r border-sage-700 bg-sage-300 transition-["width"] duration-500 ${
                 loaded && status === "authenticated"
-                  ? "lg:w-[16rem]"
-                  : "lg:w-[30%]"
+                  ? "md:w-[16rem]"
+                  : "md:w-[30%]"
               }`}
             >
               {status !== "unauthenticated" ? (

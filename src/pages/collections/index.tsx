@@ -143,7 +143,7 @@ const Collections: React.FC = () => {
     <>
       <div className="flex min-h-screen w-full justify-center p-4">
         {/* wrapper */}
-        <div className="flex min-h-full w-[70%] flex-col items-center rounded-sm bg-sage-300">
+        <div className="flex min-h-full w-full flex-col items-center rounded-sm bg-sage-300 lg:w-[70%]">
           {/* collections tabs */}
           <div className="group flex h-10 w-full items-center justify-between bg-sage-600">
             <div className="flex h-full w-full divide-x-[1px] divide-sage-600 rounded-sm border-b-[1px] border-sage-900/20 px-2 pt-2 text-sage-800">
