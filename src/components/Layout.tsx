@@ -26,7 +26,7 @@ function getBreakPoint(windowWidth: number): number {
   }
 }
 
-function useWindowSize() {
+export function useWindowSize() {
   const [isWindowClient, setIsWindowClient] = useState(false);
   const [windowSize, setWindowSize] = useState(getBreakPoint(1024));
 

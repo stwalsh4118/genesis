@@ -14,6 +14,7 @@ import { api } from "@/utils/api";
 import { toast } from "react-toastify";
 import { useOutsideAlerter } from "@/pages/collections";
 import { Group } from "@prisma/client";
+import { useWindowSize } from "@/components/Layout";
 
 interface BookDisplayProps {
   leftSlot?: ReactNode;
@@ -61,13 +62,15 @@ export const BookDisplay: React.FC<BookDisplayProps> &
   expandDisplay,
   bookId,
 }) => {
+  const windowSize = useWindowSize();
+
   useEffect(() => {
     console.log("expanded", expanded);
   }, [expanded]);
   return (
     <div
       className={`group flex w-full ${
-        expanded ? "h-[24rem]" : "h-[12rem]"
+        expanded ? "h-[24rem]" : "h-fit md:h-[12rem]"
       } shrink-0 justify-between rounded-sm bg-sage-200 text-sage-800 transition-all`}
       onClick={() => {
         if (!expandable) return;
@@ -79,16 +82,29 @@ export const BookDisplay: React.FC<BookDisplayProps> &
         }
       }}
     >
-      <div
-        className={`group flex h-[12rem] w-full shrink-0 justify-between rounded-sm bg-sage-200 p-4 text-sage-800 transition-all`}
-      >
-        {/* left */}
-        <div className="grow basis-[33%] overflow-hidden">{leftSlot}</div>
-        {/* middle */}
-        <div className="grow basis-[33%] overflow-hidden">{middleSlot}</div>
-        {/* right */}
-        <div className="grow basis-[33%] overflow-hidden">{rightSlot}</div>
-      </div>
+      {windowSize > 768 ? (
+        <div
+          className={`group flex h-[12rem] w-full shrink-0 justify-between rounded-sm bg-sage-200 p-4 text-sage-800 transition-all`}
+        >
+          {/* left */}
+          <div className="grow basis-[33%] overflow-hidden">{leftSlot}</div>
+          {/* middle */}
+          <div className="grow basis-[33%] overflow-hidden">{middleSlot}</div>
+          {/* right */}
+          <div className="grow basis-[33%] overflow-hidden">{rightSlot}</div>
+        </div>
+      ) : (
+        <div
+          className={`group flex w-full shrink-0 flex-col justify-between rounded-sm bg-sage-200 p-4 text-sage-800 transition-all`}
+        >
+          {/* left */}
+          {/* middle */}
+          <div className="grow basis-[33%] overflow-hidden">{middleSlot}</div>
+          <div className="grow basis-[33%] overflow-hidden">{leftSlot}</div>
+          {/* right */}
+          <div className="grow basis-[33%] overflow-hidden">{rightSlot}</div>
+        </div>
+      )}
     </div>
   );
 };

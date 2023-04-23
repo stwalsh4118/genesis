@@ -146,7 +146,7 @@ const Collections: React.FC = () => {
         <div className="flex min-h-full w-full flex-col items-center rounded-sm bg-sage-300 lg:w-[70%]">
           {/* collections tabs */}
           <div className="group flex h-10 w-full items-center justify-between bg-sage-600">
-            <div className="flex h-full w-full divide-x-[1px] divide-sage-600 rounded-sm border-b-[1px] border-sage-900/20 px-2 pt-2 text-sage-800">
+            <div className="no-scrollbar flex h-full w-full divide-x-[1px] divide-sage-600 overflow-scroll rounded-sm border-b-[1px] border-sage-900/20 px-2 pt-2 text-sage-800">
               {collections
                 ? collections.collections.map((collection) => {
                     return (
@@ -283,7 +283,7 @@ const Collections: React.FC = () => {
                         bookId={book.id}
                         leftSlot={
                           <div className="flex h-full justify-between">
-                            <div className="h-[12rem]">
+                            <div className="h-[12rem] shrink-0">
                               <BookDisplay.Image
                                 imageUrl={book.coverUrl ? book.coverUrl : ""}
                               />
@@ -340,7 +340,7 @@ const Collections: React.FC = () => {
                           </div>
                         }
                         middleSlot={
-                          <div className="flex h-full flex-col justify-between text-center">
+                          <div className="flex h-full shrink-0 flex-col text-center md:justify-between">
                             <BookDisplay.Title title={book.title} />
                             <BookDisplay.Author author={book.author} />
                           </div>

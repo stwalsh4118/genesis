@@ -84,7 +84,7 @@ const Search: React.FC = () => {
 
   return (
     <>
-      <div className="flex min-h-screen w-full justify-center">
+      <div className="flex min-h-[calc(100vh-10rem)] w-full justify-center md:min-h-screen">
         {/* search wrapper */}
         <div className="flex h-full w-full flex-col p-2 md:w-[70%]">
           {/* search bar */}
@@ -164,7 +164,7 @@ const Search: React.FC = () => {
             {query.some((query) => query.data) &&
             !query.every((query) => query.error) ? (
               <>
-                <div className="flex max-h-[calc(100vh-8rem)] w-full flex-col divide-y divide-sage-400 overflow-y-scroll rounded-sm bg-sage-300 px-2 pt-2">
+                <div className="flex max-h-[calc(100vh-12rem)] w-full flex-col divide-y divide-sage-400 overflow-y-scroll rounded-sm bg-sage-300 px-2 pt-2 md:max-h-[calc(100vh-8rem)]">
                   {/* search result component */}
                   {query.map((query) => {
                     if (query.data) {
