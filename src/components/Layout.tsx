@@ -90,7 +90,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, [session]);
 
   if (windowSize === undefined) {
-    return <></>;
+    return <>hi</>;
   }
 
   return (

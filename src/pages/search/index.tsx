@@ -12,6 +12,7 @@ import {
 import { BookDisplay } from "@/components/BookDisplay/BookDisplay";
 import { useSession } from "next-auth/react";
 import { useOutsideAlerter } from "../collections";
+import { Group } from "@prisma/client";
 
 const Search: React.FC = () => {
   const queryClient = useQueryClient();
@@ -203,7 +204,7 @@ const Search: React.FC = () => {
                                           )?.id
                                         : ""
                                     }
-                                    groups={groups}
+                                    groups={groups as unknown as Group[]}
                                   />
                                   <div className="flex flex-col items-end">
                                     <BookDisplay.ISBN10
@@ -254,7 +255,7 @@ const Search: React.FC = () => {
                                       )?.id
                                     : ""
                                 }
-                                groups={groups}
+                                groups={groups as unknown as Group[]}
                               />
                               <div className="flex flex-col items-end">
                                 <BookDisplay.ISBN10
