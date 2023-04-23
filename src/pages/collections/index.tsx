@@ -8,6 +8,8 @@ import {
   TrashIcon,
   PlusIcon,
   XMarkIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
 } from "@heroicons/react/24/solid";
 import Fuse from "fuse.js";
 import type { Book } from "@prisma/client";
@@ -146,7 +148,7 @@ const Collections: React.FC = () => {
         <div className="flex min-h-full w-full flex-col items-center rounded-sm bg-sage-300 lg:w-[70%]">
           {/* collections tabs */}
           <div className="group flex h-10 w-full items-center justify-between bg-sage-600">
-            <div className="no-scrollbar flex h-full w-full divide-x-[1px] divide-sage-600 overflow-scroll rounded-sm border-b-[1px] border-sage-900/20 px-2 pt-2 text-sage-800">
+            <div className="no-scrollbar flex h-full w-full divide-x-[1px] divide-sage-600 overflow-y-hidden overflow-x-scroll rounded-sm border-b-[1px] border-sage-900/20 px-2 pt-2 text-sage-800">
               {collections
                 ? collections.collections.map((collection) => {
                     return (
@@ -159,7 +161,7 @@ const Collections: React.FC = () => {
                               : ""
                           }` +
                           `${deletingCollection ? "hover:bg-red-400/50" : ""}` +
-                          " button flex h-full w-fit min-w-[6rem] max-w-[10rem] select-none items-center justify-center rounded-sm border-sage-800 bg-sage-400 px-2 text-sm text-sage-900 hover:bg-sage-400/50"
+                          " button flex h-full w-fit min-w-[6rem] shrink-0 select-none items-center justify-center whitespace-nowrap rounded-sm border-sage-800 bg-sage-400 px-2 text-sm text-sage-900 hover:bg-sage-400/50"
                         }
                         onClick={() => {
                           if (deletingCollection) {
@@ -173,7 +175,7 @@ const Collections: React.FC = () => {
                           }
                         }}
                       >
-                        {collection.name}
+                        <div className="w-fit">{collection.name}</div>
                       </div>
                     );
                   })
@@ -217,12 +219,12 @@ const Collections: React.FC = () => {
             )}
           </div>
           {/* search area */}
-          <div className="flex h-16 w-full items-center justify-between p-4">
+          <div className="flex h-16 w-full items-center justify-between gap-1 p-4">
             {/* tags */}
             {/* <div className="h-10 w-52 rounded-sm border border-sage-200/50 bg-sage-100/50 shadow-inner"></div> */}
             {/* sorting */}
-            <div className="flex gap-3">
-              <div className=" h-10 w-32 rounded-sm bg-sage-400 shadow-sm">
+            <div className="flex gap-1">
+              <div className="min-w-[4rem] rounded-sm bg-sage-400 p-2 text-xs shadow-sm md:text-lg">
                 <Dropdown
                   options={["Title", "Time Added", "Release"]}
                   value={sortType}
@@ -231,9 +233,27 @@ const Collections: React.FC = () => {
                   }}
                 ></Dropdown>
               </div>
-              <div className="h-10 w-32 rounded-sm bg-sage-400 shadow-sm">
+              <div className="min-w-[4rem] rounded-sm bg-sage-400 p-2 text-xs shadow-sm md:text-lg">
                 <Dropdown
                   options={["Ascending", "Descending"]}
+                  icons={
+                    new Map([
+                      [
+                        "Ascending",
+                        <ArrowUpIcon
+                          className="h-4 w-4 md:h-6 md:w-6"
+                          key="Ascending"
+                        />,
+                      ],
+                      [
+                        "Descending",
+                        <ArrowDownIcon
+                          className="h-4 w-4 md:h-6 md:w-6"
+                          key="Descending"
+                        />,
+                      ],
+                    ])
+                  }
                   value={sortState}
                   onChange={(e) => {
                     setSortState(e as "Ascending" | "Descending");
