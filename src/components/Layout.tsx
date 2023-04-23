@@ -6,15 +6,60 @@ import { SignInSidebar } from "./Sidebar/SignInSidebar";
 import { Sidebar } from "./Sidebar/Sidebar";
 import { api } from "@/utils/api";
 import React from "react";
+import { MobileSignInSidebar } from "./Sidebar/MobileSignInSidebar";
+import { MobileSidebar } from "./Sidebar/MobileSidebar";
 
 interface LayoutProps {
   children: React.ReactNode;
+}
+
+function getBreakPoint(windowWidth: number): number {
+  console.log("IN BREAKPOINT STUFF", windowWidth);
+  if (windowWidth < 720) {
+    return 720;
+  } else if (windowWidth < 1024) {
+    return 1024;
+  } else if (windowWidth < 1280) {
+    return 1280;
+  } else {
+    return 1280;
+  }
+}
+
+function useWindowSize() {
+  const isWindowClient = typeof window === "object";
+
+  const [windowSize, setWindowSize] = useState(
+    isWindowClient
+      ? getBreakPoint(window.innerWidth) //👈
+      : undefined
+  );
+
+  useEffect(() => {
+    //a handler which will be called on change of the screen resize
+    function setSize() {
+      setWindowSize(getBreakPoint(window.innerWidth)); //👈
+      console.log("SETTING WINDOW SIZE", getBreakPoint(window.innerWidth));
+    }
+
+    if (isWindowClient) {
+      //register the window resize listener
+      window.addEventListener("resize", setSize);
+
+      //unregister the listerner on destroy of the hook
+      return () => window.removeEventListener("resize", setSize);
+    }
+  }, [isWindowClient, setWindowSize]);
+
+  return windowSize;
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { data: session, status } = useSession();
   const [loaded, setLoaded] = useState(false);
   const router = useRouter();
+  // const currentBreakpoint = useBreakpoint([720, 1024, 1280]);
+  const windowSize = useWindowSize();
 
   const addCollection = api.user_collections.addCollection.useMutation();
 
@@ -44,6 +89,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     }, 100);
   }, [session]);
 
+  if (windowSize === undefined) {
+    return <></>;
+  }
+
   return (
     <>
       <Head>
@@ -52,19 +101,33 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex h-screen w-full overflow-hidden bg-sage-100">
-        <div
-          className={`flex max-h-screen min-w-[10rem] shrink-0 select-none border-r border-sage-700 bg-sage-300 transition-["width"] duration-500 ${
-            loaded && status === "authenticated" ? "w-[16rem]" : "w-[30%]"
-          }`}
-        >
-          {status !== "unauthenticated" ? (
-            <Sidebar loaded={loaded}></Sidebar>
+        <div className="flex w-full flex-col lg:flex-row">
+          {/* sidebars */}
+          {windowSize >= 1024 ? (
+            <div
+              className={`flex max-h-screen w-full min-w-[10rem] shrink-0 select-none border-r border-sage-700 bg-sage-300 transition-["width"] duration-500 ${
+                loaded && status === "authenticated"
+                  ? "lg:w-[16rem]"
+                  : "lg:w-[30%]"
+              }`}
+            >
+              {status !== "unauthenticated" ? (
+                <Sidebar loaded={loaded}></Sidebar>
+              ) : (
+                <SignInSidebar></SignInSidebar>
+              )}
+            </div>
           ) : (
-            <SignInSidebar></SignInSidebar>
+            <div className="border-b border-sage-700 bg-sage-300">
+              {status !== "unauthenticated" ? (
+                <MobileSidebar></MobileSidebar>
+              ) : (
+                <MobileSignInSidebar></MobileSignInSidebar>
+              )}
+            </div>
           )}
+          {children}
         </div>
-
-        {children}
       </div>
     </>
   );
