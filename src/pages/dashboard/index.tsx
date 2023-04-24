@@ -132,7 +132,7 @@ const Dashboard: React.FC = () => {
                 className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
                 key="d"
               >
-                {genresRead.length > 0 ? (
+                {genresRead ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       width={500}
