@@ -1,5 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { type PagesReadEventData } from "./events";
+import { Book } from "@prisma/client";
 
 export const userDashboardRouter = createTRPCRouter({
   averageRating: protectedProcedure.query(async ({ ctx }) => {
@@ -114,8 +115,52 @@ export const userDashboardRouter = createTRPCRouter({
       );
     });
 
-    console.log(pagesReadEvents);
+    // console.log(pagesReadEvents);
 
     return null;
+  }),
+
+  genresRead: protectedProcedure.query(async ({ ctx }) => {
+    const user = ctx.session.user;
+
+    const books = await ctx.prisma.user.findFirst({
+      where: {
+        id: user.id,
+      },
+      select: {
+        books: true,
+      },
+    });
+
+    if (!books) {
+      return [];
+    }
+
+    const filteredBooks = books.books.filter((book: Book) => {
+      return !book.genres?.includes("N/A");
+    });
+
+    const genres = new Map<string, number>();
+
+    filteredBooks.forEach((book) => {
+      book.genres?.forEach((genre) => {
+        if (genres.has(genre)) {
+          genres.set(genre, genres.get(genre)! + 1);
+        } else {
+          genres.set(genre, 1);
+        }
+      });
+    });
+
+    const genresObject: { name: string; count: number }[] = [];
+
+    genres.forEach((value, key) => {
+      genresObject.push({
+        name: key,
+        count: value,
+      });
+    });
+
+    return genresObject;
   }),
 });

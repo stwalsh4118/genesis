@@ -14,7 +14,6 @@ interface LayoutProps {
 }
 
 function getBreakPoint(windowWidth: number): number {
-  console.log("IN BREAKPOINT STUFF", windowWidth);
   if (windowWidth < 720) {
     return 720;
   } else if (windowWidth < 1024) {
@@ -42,7 +41,6 @@ export function useWindowSize() {
     //a handler which will be called on change of the screen resize
     function setSize() {
       setWindowSize(getBreakPoint(window.innerWidth));
-      console.log("SETTING WINDOW SIZE", getBreakPoint(window.innerWidth));
     }
 
     if (isWindowClient) {

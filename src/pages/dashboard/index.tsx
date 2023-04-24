@@ -10,6 +10,16 @@ import "/node_modules/react-resizable/css/styles.css";
 import { api } from "@/utils/api";
 import { Heatmap } from "@/components/Dashboard/Heatmap";
 import { OverTimeGraph } from "@/components/Dashboard/OverTimeGraph";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 const Dashboard: React.FC = () => {
   const { data: session, status } = useSession();
@@ -23,6 +33,7 @@ const Dashboard: React.FC = () => {
   const { data: pagesTotal } = api.user_dashboard.totalPagesRead.useQuery();
   const { data: pagesOverTime } =
     api.user_dashboard.pagesReadOverTime.useQuery();
+  const { data: genresRead } = api.user_dashboard.genresRead.useQuery();
 
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), []);
 
@@ -39,7 +50,7 @@ const Dashboard: React.FC = () => {
     { i: "b", x: 2, y: 0, w: 2, h: 2 },
     { i: "c", x: 4, y: 0, w: 2, h: 2 },
 
-    { i: "d", x: 0, y: 2, w: 3, h: 4 },
+    { i: "d", x: 0, y: 2, w: 6, h: 4 },
     { i: "e", x: 0, y: 6, w: 12, h: 4 },
     { i: "f", x: 3, y: 2, w: 3, h: 4 },
     { i: "h", x: 7, y: 0, w: 6, h: 6 },
@@ -120,17 +131,47 @@ const Dashboard: React.FC = () => {
               <div
                 className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
                 key="d"
-              ></div>
+              >
+                {genresRead.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      width={500}
+                      height={300}
+                      data={genresRead}
+                      margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5,
+                      }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="rgb(38 43 30)"
+                      />
+                      <XAxis dataKey="name" stroke="rgb(38 43 30)" />
+                      <YAxis stroke="rgb(38 43 30)" />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="count" fill="rgb(97 109 77)" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex flex-grow items-center justify-center text-xl font-bold text-sage-800">
+                    Read some books!
+                  </div>
+                )}
+              </div>
               <div
                 className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
                 key="e"
               >
                 <Heatmap></Heatmap>
               </div>
-              <div
+              {/* <div
                 className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
                 key="f"
-              ></div>
+              ></div> */}
               <div
                 className="flex flex-col gap-8 rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"
                 key="h"

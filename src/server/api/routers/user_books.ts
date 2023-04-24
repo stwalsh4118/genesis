@@ -14,6 +14,7 @@ const bookShape: ZodShape<Book> = {
   coverUrl: z.string().optional(),
   rating: z.number().optional(),
   review: z.string().optional(),
+  genres: z.array(z.string()).optional(),
 };
 
 export const userBooksRouter = createTRPCRouter({
@@ -76,6 +77,7 @@ export const userBooksRouter = createTRPCRouter({
               id: allCollection?.id,
             },
           },
+          genres: input.book.genres,
         },
       });
 

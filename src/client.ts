@@ -1,6 +1,7 @@
 import axios from "axios";
 import { api } from "./utils/api";
 import { toast } from "react-toastify";
+import { matchGenres } from "./utils/client_utils";
 
 export interface Book {
   title: string;
@@ -11,6 +12,7 @@ export interface Book {
   coverUrl?: string;
   rating?: number;
   review?: string;
+  genres?: string[];
 }
 
 export interface BookResponse {
@@ -31,6 +33,10 @@ export interface BookResponse {
   };
   number_of_pages: number;
   publish_date: string;
+  subjects: {
+    name: string;
+    url: string;
+  }[];
 }
 
 export interface BookDoc {
@@ -39,6 +45,7 @@ export interface BookDoc {
   author_name: string[];
   number_of_pages_median: number;
   cover_i: number;
+  subject: string[];
 }
 
 export interface BookSearchResult {
@@ -60,6 +67,8 @@ export const getBookByIsbn = async (isbn: string) => {
   const bookResponseParsed =
     Object.keys(data).length > 0 ? data[`ISBN:${isbn}`] : null;
 
+  console.log(bookResponseParsed);
+
   const book = {} as Book;
 
   if (bookResponseParsed) {
@@ -75,6 +84,10 @@ export const getBookByIsbn = async (isbn: string) => {
     book.isbn10 = bookResponseParsed.identifiers.isbn_10[0];
     book.isbn13 = bookResponseParsed.identifiers.isbn_13[0];
     book.coverUrl = bookResponseParsed.cover.large;
+    const genres = matchGenres(
+      bookResponseParsed.subjects.map((subject) => subject.name)
+    );
+    book.genres = genres.length > 0 ? genres : ["N/A"];
   }
 
   return bookResponseParsed ? book : null;
@@ -94,6 +107,8 @@ export const getBookByTitle = async (title: string) => {
     book.isbn10 = doc.isbn ? doc.isbn.find((isbn) => isbn.length === 10) : "";
     book.isbn13 = doc.isbn ? doc.isbn.find((isbn) => isbn.length === 13) : "";
     book.coverUrl = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
+    const genres = matchGenres(doc.subject);
+    book.genres = genres.length > 0 ? genres : ["N/A"];
 
     return book;
   });
@@ -106,6 +121,8 @@ export const getBookByAuthor = async (author: string) => {
     `https://openlibrary.org/search.json?author=${author}`
   );
 
+  console.log(data);
+
   const books = data.docs.map((doc) => {
     const book = {} as Book;
 
@@ -115,6 +132,8 @@ export const getBookByAuthor = async (author: string) => {
     book.isbn10 = doc.isbn ? doc.isbn.find((isbn) => isbn.length === 10) : "";
     book.isbn13 = doc.isbn ? doc.isbn.find((isbn) => isbn.length === 13) : "";
     book.coverUrl = `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`;
+    const genres = matchGenres(doc.subject);
+    book.genres = genres.length > 0 ? genres : ["N/A"];
 
     return book;
   });
