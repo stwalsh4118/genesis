@@ -20,7 +20,7 @@ const Search: React.FC = () => {
   const [formData, setFormData] = useState("");
   const [searchDropdownActive, setSearchDropdownActive] = useState(false);
   const [searchType, setSearchType] = useState<"ISBN" | "Title" | "Author">(
-    "Title"
+    "Author"
   );
   const [searchQuery, setSearchQuery] = useState("");
   const dropdown = useRef(null);

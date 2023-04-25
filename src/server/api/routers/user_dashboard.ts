@@ -1,6 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { type PagesReadEventData } from "./events";
 import { Book } from "@prisma/client";
+import { z } from "zod";
 
 export const userDashboardRouter = createTRPCRouter({
   averageRating: protectedProcedure.query(async ({ ctx }) => {
@@ -162,5 +163,41 @@ export const userDashboardRouter = createTRPCRouter({
     });
 
     return genresObject;
+  }),
+
+  updateUserLayout: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      const user = ctx.session.user;
+
+      await ctx.prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          dashboardLayout: input,
+        },
+      });
+
+      return input;
+    }),
+
+  getUserLayout: protectedProcedure.query(async ({ ctx }) => {
+    const user = ctx.session.user;
+
+    const userLayout = await ctx.prisma.user.findFirst({
+      where: {
+        id: user.id,
+      },
+      select: {
+        dashboardLayout: true,
+      },
+    });
+
+    if (!userLayout) {
+      return "";
+    }
+
+    return userLayout.dashboardLayout;
   }),
 });

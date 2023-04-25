@@ -21,11 +21,29 @@ import {
   YAxis,
 } from "recharts";
 
+export type Layout = {
+  i: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}[];
+
 const Dashboard: React.FC = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [loaded, setLoaded] = useState(false);
   const [locked, setLocked] = useState(true);
+  const [layout, setLayout] = useState<Layout>([
+    { i: "a", x: 0, y: 0, w: 2, h: 2 },
+    { i: "b", x: 2, y: 0, w: 2, h: 2 },
+    { i: "c", x: 4, y: 0, w: 2, h: 2 },
+
+    { i: "d", x: 0, y: 2, w: 6, h: 4 },
+    { i: "e", x: 0, y: 6, w: 12, h: 4 },
+    { i: "f", x: 3, y: 2, w: 3, h: 4 },
+    { i: "h", x: 7, y: 0, w: 6, h: 6 },
+  ]);
 
   const { data: averageRating } = api.user_dashboard.averageRating.useQuery();
   const { data: finishedBooks } =
@@ -34,8 +52,27 @@ const Dashboard: React.FC = () => {
   const { data: pagesOverTime } =
     api.user_dashboard.pagesReadOverTime.useQuery();
   const { data: genresRead } = api.user_dashboard.genresRead.useQuery();
+  const { data: userLayout } = api.user_dashboard.getUserLayout.useQuery();
+  const updateLayout = api.user_dashboard.updateUserLayout.useMutation();
 
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), []);
+
+  useEffect(() => {
+    if (userLayout) {
+      setLayout(JSON.parse(userLayout) as Layout);
+    } else {
+      setLayout([
+        { i: "a", x: 0, y: 0, w: 2, h: 2 },
+        { i: "b", x: 2, y: 0, w: 2, h: 2 },
+        { i: "c", x: 4, y: 0, w: 2, h: 2 },
+
+        { i: "d", x: 0, y: 2, w: 6, h: 4 },
+        { i: "e", x: 0, y: 6, w: 12, h: 4 },
+        { i: "f", x: 3, y: 2, w: 3, h: 4 },
+        { i: "h", x: 7, y: 0, w: 6, h: 6 },
+      ]);
+    }
+  }, [userLayout]);
 
   useEffect(() => {
     setInterval(() => {
@@ -45,22 +82,11 @@ const Dashboard: React.FC = () => {
 
   if (!session) return <></>;
 
-  const layout = [
-    { i: "a", x: 0, y: 0, w: 2, h: 2 },
-    { i: "b", x: 2, y: 0, w: 2, h: 2 },
-    { i: "c", x: 4, y: 0, w: 2, h: 2 },
-
-    { i: "d", x: 0, y: 2, w: 6, h: 4 },
-    { i: "e", x: 0, y: 6, w: 12, h: 4 },
-    { i: "f", x: 3, y: 2, w: 3, h: 4 },
-    { i: "h", x: 7, y: 0, w: 6, h: 6 },
-  ];
-
   return (
     <>
       {loaded ? (
-        <div className="flex max-w-full grow select-none flex-col overflow-x-hidden bg-sage-100">
-          <div className="flex h-10 w-full items-center px-10">
+        <div className="flex max-w-full grow select-none flex-col overflow-hidden bg-sage-100">
+          <div className="flex h-10 w-full items-center gap-2 px-10">
             <div
               className="button h-6 w-6 text-sage-800"
               onClick={() => setLocked(!locked)}
@@ -71,8 +97,16 @@ const Dashboard: React.FC = () => {
                 <LockOpenIcon className="ml-[3px] h-full w-full"></LockOpenIcon>
               )}
             </div>
+            <div
+              className="button rounded-sm bg-sage-400 px-1 shadow-sm"
+              onClick={() => {
+                updateLayout.mutate(JSON.stringify(layout));
+              }}
+            >
+              Save
+            </div>
           </div>
-          <div className="flex min-h-[calc(100vh-2.5rem)] max-w-full grow select-none flex-col overflow-hidden bg-sage-100 px-8">
+          <div className="flex min-h-[calc(100vh-2.5rem)] max-w-full grow select-none flex-col overflow-x-hidden overflow-y-scroll bg-sage-100 px-8">
             <ResponsiveGridLayout
               className="layout"
               layouts={{
@@ -85,6 +119,7 @@ const Dashboard: React.FC = () => {
               compactType={"vertical"}
               autoSize={true}
               maxRows={12}
+              onLayoutChange={(layout) => setLayout(layout)}
             >
               <div
                 className="flex flex-col rounded-sm border-[1px] border-sage-400/30 bg-sage-200 p-2 shadow-md"

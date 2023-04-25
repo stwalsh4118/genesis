@@ -45,7 +45,7 @@ model User {
   email           String?      @unique
   emailVerified   DateTime?
   image           String?
-  dashboardLayout Json?
+  dashboardLayout String?
   accounts        Account[]
   books           Book[]
   collections     Collection[]
