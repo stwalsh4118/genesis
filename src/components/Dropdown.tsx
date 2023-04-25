@@ -43,7 +43,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
           </div>
         )}
         {isOpen ? (
-          <div className="absolute top-[calc(100%)] -left-2 z-10 w-full min-w-fit bg-sage-500 p-2">
+          <div className="no-scrollbar absolute top-[calc(100%)] -left-2 z-10 w-full min-w-fit overflow-y-scroll bg-sage-500 p-2">
             {options?.map((option) => (
               <div
                 key={option}

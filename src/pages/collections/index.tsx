@@ -325,7 +325,7 @@ const Collections: React.FC = () => {
                                         ? dropdown
                                         : null
                                     }
-                                    className="absolute top-6 flex h-[8.5rem] w-full flex-col divide-y-[1px] divide-sage-500/80 rounded-b-sm bg-sage-400/50"
+                                    className="no-scrollbar absolute top-6 z-10 flex h-20 w-full flex-col divide-y-[1px] divide-sage-500/80 overflow-y-scroll rounded-b-sm bg-sage-400/50"
                                   >
                                     {collections
                                       ? collections.collections.map(
