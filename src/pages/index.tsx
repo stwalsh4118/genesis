@@ -1,23 +1,20 @@
 import { type NextPage } from "next";
-import Link from "next/link";
-import Image from "next/image";
 import { signIn, signOut, useSession } from "next-auth/react";
 
-import { api } from "@/utils/api";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { Canvas, ThreeElements, useFrame, useLoader } from "@react-three/fiber";
-import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
-import { useFBX } from "@react-three/drei";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import dynamic from "next/dynamic";
+import { OrbitControls } from "@react-three/drei";
+
+const BookModel = dynamic(() => import("@/components/BookModel"), {
+  ssr: false,
+});
 
 const Home: NextPage = () => {
   const { data: session } = useSession();
   const router = useRouter();
   // load the book model
-  const fbx = useLoader(GLTFLoader, "/quillbook.glb");
-
-  // const obj = useLoader(OBJLoader, "./book.obj");
 
   const redirectIfSession = async () => {
     if (session) {
@@ -37,9 +34,10 @@ const Home: NextPage = () => {
           {" "}
           <ambientLight />
           <pointLight position={[10, 10, 10]} />
-          <Box position={[-1.2, 0, 0]} />
-          <Box position={[1.2, 0, 0]} />
-          <primitive object={fbx} />
+          {/* <Box position={[-1.2, 0, 0]} />
+          <Box position={[1.2, 0, 0]} /> */}
+          <BookModel></BookModel>
+          <OrbitControls />
         </Canvas>
       </div>
     </>
