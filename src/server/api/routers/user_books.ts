@@ -14,6 +14,7 @@ const bookShape: ZodShape<Book> = {
   coverUrl: z.string().optional(),
   rating: z.number().optional(),
   review: z.string().optional(),
+  pagesRead: z.number().optional(),
   genres: z.array(z.string()).optional(),
 };
 

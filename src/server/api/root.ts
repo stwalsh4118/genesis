@@ -5,6 +5,7 @@ import { userDashboardRouter } from "./routers/user_dashboard";
 import { eventsRouter } from "./routers/events";
 import { groupCollectionsRouter } from "./routers/group_collections";
 import { groupRouter } from "./routers/group";
+import { groupBooksRouter } from "./routers/group_books";
 
 /**
  * This is the primary router for your server.
@@ -17,6 +18,7 @@ export const appRouter = createTRPCRouter({
   user_dashboard: userDashboardRouter,
   events: eventsRouter,
   group_collections: groupCollectionsRouter,
+  group_books: groupBooksRouter,
   group: groupRouter,
 });
 

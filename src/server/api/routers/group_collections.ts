@@ -4,6 +4,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import type { ZodShape } from "@/server/api/trpc";
 import type { Book } from "@/client";
 import { GroupCollection } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 
 const bookShape: ZodShape<Book> = {
   title: z.string(),
@@ -14,6 +15,7 @@ const bookShape: ZodShape<Book> = {
   coverUrl: z.string().optional(),
   rating: z.number().optional(),
   review: z.string().optional(),
+  pagesRead: z.number().optional(),
   genres: z.array(z.string()).optional(),
 };
 
@@ -62,13 +64,26 @@ export const groupCollectionsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const groupCollection = await ctx.prisma.groupCollection.delete({
+      const groupCollection = await ctx.prisma.groupCollection.findFirst({
         where: {
           id: input.id,
         },
       });
 
-      return groupCollection;
+      if (groupCollection?.name === "All") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot delete the All collection",
+        });
+      }
+
+      const deletedGroupCollection = await ctx.prisma.groupCollection.delete({
+        where: {
+          id: input.id,
+        },
+      });
+
+      return deletedGroupCollection;
     }),
 
   addBookToGroupCollection: protectedProcedure
@@ -123,5 +138,96 @@ export const groupCollectionsRouter = createTRPCRouter({
       console.log(userBook);
 
       return userBook;
+    }),
+
+  addBookToGroupCollectionById: protectedProcedure
+    .input(
+      z.object({
+        bookId: z.string(),
+        groupId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const groupCollections = await ctx.prisma.group.findFirst({
+        where: {
+          id: input.groupId,
+        },
+        select: {
+          groupCollections: true,
+        },
+      });
+
+      let allCollection: GroupCollection | undefined;
+      if (groupCollections) {
+        allCollection = groupCollections.groupCollections.find(
+          (collection) => collection.name === "All"
+        );
+      }
+
+      if (!allCollection) {
+        allCollection = await ctx.prisma.groupCollection.create({
+          data: {
+            name: "All",
+            groupId: input.groupId,
+          },
+        });
+      }
+
+      await ctx.prisma.groupCollection.update({
+        where: {
+          id: allCollection?.id,
+        },
+        data: {
+          books: {
+            connect: {
+              id: input.bookId,
+            },
+          },
+        },
+      });
+    }),
+
+  addBookToGroupCollectionByCollectionId: protectedProcedure
+    .input(
+      z.object({
+        bookId: z.string(),
+        collectionId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.groupCollection.update({
+        where: {
+          id: input.collectionId,
+        },
+        data: {
+          books: {
+            connect: {
+              id: input.bookId,
+            },
+          },
+        },
+      });
+    }),
+
+  deleteBookFromGroupCollection: protectedProcedure
+    .input(
+      z.object({
+        bookId: z.string(),
+        collectionId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.groupCollection.update({
+        where: {
+          id: input.collectionId,
+        },
+        data: {
+          books: {
+            disconnect: {
+              id: input.bookId,
+            },
+          },
+        },
+      });
     }),
 });

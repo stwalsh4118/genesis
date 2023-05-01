@@ -8,20 +8,28 @@ import {
   TrashIcon,
   PlusIcon,
   XMarkIcon,
+  Cog8ToothIcon,
 } from "@heroicons/react/24/solid";
 import Fuse from "fuse.js";
 import type { GroupBook } from "@prisma/client";
 
 import {
-  useAddBooksToCollection,
+  useAddBookToGroupCollectionByCollectionId,
   useAddCollection,
+  useCreateGroupCollection,
   useDeleteBook,
+  useDeleteBookFromGroupCollection,
   useDeleteCollection,
+  useDeleteGroup,
+  useDeleteGroupBook,
+  useDeleteGroupCollection,
   useRemoveBooksFromCollection,
   useUpdateBook,
   useUpdateGroup,
+  useUpdateGroupBook,
 } from "@/client";
 import { useRouter } from "next/router";
+import { toast } from "react-toastify";
 
 export const useOutsideAlerter = (
   ref: RefObject<HTMLDivElement>,
@@ -51,17 +59,22 @@ const GroupCollections: React.FC = () => {
   const [selectedDropdown, setSelectedDropdown] = useState("");
   const [expandedBook, setExpandedBook] = useState("");
   const [selectedCollection, setSelectedCollection] = useState("All");
+  const [settingsDropdown, setSettingsDropdown] = useState(false);
   const [searchResults, setSearchResults] = useState<GroupBook[]>([]);
   const [addingCollection, setAddingCollection] = useState(false);
   const [deletingCollection, setDeletingCollection] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const dropdown = useRef<HTMLDivElement>(null);
-  const addBooksToCollection = useAddBooksToCollection();
+  const settingsDropdownRef = useRef<HTMLDivElement>(null);
+  const addBookToGroupCollectionByCollectionId =
+    useAddBookToGroupCollectionByCollectionId();
   const removeBooksFromCollection = useRemoveBooksFromCollection();
-  const addCollection = useAddCollection();
-  const deleteBook = useDeleteBook();
-  const updateBook = useUpdateBook();
-  const deleteCollection = useDeleteCollection();
+  const createGroupCollection = useCreateGroupCollection();
+  const deleteBookFromGroupCollection = useDeleteBookFromGroupCollection();
+  const deleteGroupBook = useDeleteGroupBook();
+  const updateGroupBook = useUpdateGroupBook();
+  const deleteGroupCollection = useDeleteGroupCollection();
+  const deleteGroup = useDeleteGroup();
   const updateGroup = useUpdateGroup();
   const router = useRouter();
 
@@ -81,6 +94,7 @@ const GroupCollections: React.FC = () => {
   const { data } = useSession();
 
   useOutsideAlerter(dropdown, () => setSelectedDropdown(""));
+  useOutsideAlerter(settingsDropdownRef, () => setSettingsDropdown(false));
 
   if (groupLoading) return <div>loading</div>;
   if (groupError) return <div>error</div>;
@@ -99,15 +113,54 @@ const GroupCollections: React.FC = () => {
     const formData = new FormData(e.currentTarget);
     const collectionName = formData.get("name") as string;
 
-    addCollection.mutate({
+    createGroupCollection.mutate({
       name: collectionName,
+      groupId: group.id,
     });
     setAddingCollection(false);
     formRef.current?.reset();
   };
   return (
     <>
-      <div className="flex min-h-screen w-full justify-center p-4">
+      <div className="relative flex min-h-screen w-full justify-center p-4">
+        {/* invite button */}
+        <div
+          className="button absolute right-2 top-2 rounded-sm bg-sage-500 p-2 px-2 text-sage-800 shadow-sm"
+          onClick={() => {
+            void navigator.clipboard.writeText(
+              `${window.location.origin}/groups/invite/${group.id}`
+            );
+            toast.success("Invite copied to clipboard");
+          }}
+        >
+          Generate Invite
+        </div>
+        {/* settings button */}
+        <div className="absolute left-2 top-2">
+          <Cog8ToothIcon
+            className="button h-8 w-8 text-sage-800"
+            onClick={() => {
+              setSettingsDropdown(!settingsDropdown);
+            }}
+          ></Cog8ToothIcon>
+          {settingsDropdown ? (
+            <div
+              ref={settingsDropdownRef}
+              className="flex w-48 flex-col divide-y divide-sage-800 bg-sage-400 p-1"
+            >
+              <div
+                className="button"
+                onClick={() => {
+                  deleteGroup.mutate({
+                    id: group.id,
+                  });
+                }}
+              >
+                Delete Group
+              </div>
+            </div>
+          ) : null}
+        </div>
         {/* wrapper */}
         <div className="flex min-h-full w-[70%] flex-col items-center rounded-sm bg-sage-300">
           {/* collections tabs */}
@@ -129,8 +182,8 @@ const GroupCollections: React.FC = () => {
                         }
                         onClick={() => {
                           if (deletingCollection) {
-                            deleteCollection.mutate({
-                              collectionId: collection.id,
+                            deleteGroupCollection.mutate({
+                              id: collection.id,
                             });
                             setDeletingCollection(false);
                           } else {
@@ -258,10 +311,12 @@ const GroupCollections: React.FC = () => {
                                               key={collection.name}
                                               className="button flex h-full w-full select-none items-center justify-center rounded-b-sm border-sage-800 px-2 text-sm text-sage-900 hover:bg-sage-400/30 active:bg-sage-400/80"
                                               onClick={() => {
-                                                addBooksToCollection.mutate({
-                                                  bookIds: book.id,
-                                                  collectionId: collection.id,
-                                                });
+                                                addBookToGroupCollectionByCollectionId.mutate(
+                                                  {
+                                                    bookId: book.id,
+                                                    collectionId: collection.id,
+                                                  }
+                                                );
                                                 setSelectedDropdown("");
                                               }}
                                             >
@@ -305,23 +360,23 @@ const GroupCollections: React.FC = () => {
 
                                   if (!currentCollection) return;
 
-                                  removeBooksFromCollection.mutate({
-                                    bookIds: book.id,
+                                  deleteBookFromGroupCollection.mutate({
+                                    bookId: book.id,
                                     collectionId: currentCollection.id,
                                   });
                                 } else {
-                                  deleteBook.mutate({ bookId: book.id });
+                                  deleteGroupBook.mutate({ id: book.id });
                                 }
                               }}
                             ></TrashIcon>
                             <div className="flex flex-col justify-end gap-1">
-                              <BookDisplay.Pages
+                              <BookDisplay.GroupPages
                                 pages={book.pages ? book.pages : 0}
                                 bookId={book.id}
                                 readPages={book.pagesRead ? book.pagesRead : 0}
                               />
                               <BookDisplay.StarReview
-                                updateBook={updateBook}
+                                updateBook={updateGroupBook}
                                 bookId={book.id}
                                 initialRating={book.rating ? book.rating : 0}
                               />

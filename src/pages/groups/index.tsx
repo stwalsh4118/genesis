@@ -28,9 +28,11 @@ const GroupsPage: React.FC = () => {
             </div>
             <BookDisplay
               leftSlot={
-                <BookDisplay.Image
-                  imageUrl={group.pinnedBook?.coverUrl ?? ""}
-                ></BookDisplay.Image>
+                group.pinnedBook?.coverUrl ? (
+                  <BookDisplay.Image
+                    imageUrl={group.pinnedBook?.coverUrl ?? ""}
+                  ></BookDisplay.Image>
+                ) : null
               }
               // middleSlot={}
               // rightSlot={}

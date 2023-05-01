@@ -14,6 +14,7 @@ const bookShape: ZodShape<Book> = {
   coverUrl: z.string().optional(),
   rating: z.number().optional(),
   review: z.string().optional(),
+  pagesRead: z.number().optional(),
   genres: z.array(z.string()).optional(),
 };
 
@@ -29,6 +30,40 @@ export const groupBooksRouter = createTRPCRouter({
         where: {
           id: input.id,
         },
+      });
+
+      return groupBook;
+    }),
+
+  deleteGroupBook: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const groupBook = await ctx.prisma.groupBook.delete({
+        where: {
+          id: input.id,
+        },
+      });
+
+      return groupBook;
+    }),
+
+  updateGroupBook: protectedProcedure
+    .input(
+      z.object({
+        bookId: z.string(),
+        data: z.object(bookShape).partial(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const groupBook = await ctx.prisma.groupBook.update({
+        where: {
+          id: input.bookId,
+        },
+        data: input.data,
       });
 
       return groupBook;

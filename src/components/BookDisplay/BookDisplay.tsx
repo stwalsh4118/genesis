@@ -31,6 +31,11 @@ interface BookDisplayComponents {
   Title: React.FC<{ title: string }>;
   Author: React.FC<{ author: string }>;
   Pages: React.FC<{ pages: number; bookId?: string; readPages?: number }>;
+  GroupPages: React.FC<{
+    pages: number;
+    bookId?: string;
+    readPages?: number;
+  }>;
   ISBN10: React.FC<{ isbn10: string }>;
   ISBN13: React.FC<{ isbn13: string }>;
   AddBookButton: React.FC<{
@@ -137,6 +142,7 @@ const BookDisplayPages: React.FC<{
   pages: number;
   bookId?: string;
   readPages?: number;
+  updateBook?: UseTRPCMutationResult<any, any, any, any>;
 }> = ({ pages, bookId, readPages }) => {
   const inputRef = useRef<LegacyRef<HTMLInputElement>>(null);
   const [inputValue, setInputValue] = useState<number>(readPages || 0);
@@ -176,6 +182,81 @@ const BookDisplayPages: React.FC<{
                       pagesRead: inputValue,
                       totalPages: pages,
                       prevPages: readPages,
+                    });
+                  }}
+                ></CheckIcon>
+                <XMarkIcon
+                  className="h-4 w-4 text-red-800"
+                  onClick={() => {
+                    setInputValue(readPages || 0);
+                    (inputRef.current as unknown as HTMLInputElement).value =
+                      readPages.toFixed(0) || "0";
+                    setDirty(false);
+                  }}
+                ></XMarkIcon>
+              </>
+            ) : null}
+            <input
+              className="z-60 w-10 bg-sage-200 pl-1 text-right text-sage-800"
+              type="number"
+              placeholder={"0"}
+              defaultValue={readPages}
+              onClick={() => {
+                (inputRef.current as unknown as HTMLInputElement).select();
+              }}
+              ref={inputRef as LegacyRef<HTMLInputElement>}
+              onChange={(e) => {
+                setInputValue(parseInt(e.target.value));
+                setDirty(true);
+              }}
+            ></input>
+            <span className="text-sage-800">/</span>
+          </>
+        ) : null}
+        <span>{pages}</span> <span className="text-sage-800/70">Pages</span>
+      </div>
+    </>
+  );
+};
+
+const BookDisplayGroupPages: React.FC<{
+  pages: number;
+  bookId?: string;
+  readPages?: number;
+}> = ({ pages, bookId, readPages }) => {
+  const inputRef = useRef<LegacyRef<HTMLInputElement>>(null);
+  const [inputValue, setInputValue] = useState<number>(readPages || 0);
+  const [dirty, setDirty] = useState<boolean>(false);
+  const updateBook = api.group_books.updateGroupBook.useMutation({
+    onSuccess: (data, variables) => {
+      setDirty(false);
+      toast.success("Updated read pages for book");
+    },
+    onError: () => {
+      toast.error("Failed to update read pages for book");
+    },
+  });
+
+  return (
+    <>
+      <div
+        className="flex items-center justify-center gap-1"
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {readPages || readPages === 0 ? (
+          <>
+            {dirty ? (
+              <>
+                <CheckIcon
+                  className="h-4 w-4 text-green-800"
+                  onClick={() => {
+                    updateBook.mutate({
+                      bookId: bookId!,
+                      data: {
+                        pagesRead: inputValue,
+                      },
                     });
                   }}
                 ></CheckIcon>
@@ -295,7 +376,7 @@ const BookDisplayAddButton: React.FC<{
             </div>
           </div>
         ) : dropdownState === "group" ? (
-          <div className="absolute top-7 -left-[calc(10rem-100%)] w-40">
+          <div className="no-scrollbar absolute top-7 -left-[calc(10rem-100%)] h-20 w-40 overflow-y-scroll">
             <div className="flex flex-col divide-y-[1px] divide-sage-800/20 border border-sage-800/20 text-center shadow-sm">
               {groups?.map((group) => {
                 return (
@@ -411,6 +492,7 @@ BookDisplay.Image = BookDisplayImage;
 BookDisplay.Author = BookDisplayAuthor;
 BookDisplay.Title = BookDisplayTitle;
 BookDisplay.Pages = BookDisplayPages;
+BookDisplay.GroupPages = BookDisplayGroupPages;
 BookDisplay.ISBN10 = BookDisplayISBN10;
 BookDisplay.ISBN13 = BookDisplayISBN13;
 BookDisplay.AddBookButton = BookDisplayAddButton;

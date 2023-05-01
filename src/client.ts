@@ -2,6 +2,7 @@ import axios from "axios";
 import { api } from "./utils/api";
 import { toast } from "react-toastify";
 import { matchGenres } from "./utils/client_utils";
+import { useRouter } from "next/router";
 
 export interface Book {
   title: string;
@@ -12,6 +13,7 @@ export interface Book {
   coverUrl?: string;
   rating?: number;
   review?: string;
+  pagesRead?: number;
   genres?: string[];
 }
 
@@ -232,4 +234,161 @@ export const useUpdateGroup = () => {
   });
 
   return updateGroup;
+};
+
+export const useAddUserToGroup = () => {
+  const router = useRouter();
+  const addUserToGroup = api.group.addUserToGroup.useMutation({
+    onSuccess: () => {
+      toast.success("User added to group");
+      void router.push("/groups");
+    },
+    onError: () => {
+      toast.error("Failed to add user to group");
+    },
+  });
+
+  return addUserToGroup;
+};
+
+export const useAddBookToGroupCollection = () => {
+  const addBookToGroupCollection =
+    api.group_collections.addBookToGroupCollection.useMutation({
+      onSuccess: () => {
+        toast.success("Book added to group collection");
+      },
+      onError: () => {
+        toast.error("Failed to add book to group collection");
+      },
+    });
+
+  return addBookToGroupCollection;
+};
+
+export const useAddBookToGroupCollectionById = () => {
+  const addBookToGroupCollectionById =
+    api.group_collections.addBookToGroupCollectionById.useMutation({
+      onSuccess: () => {
+        toast.success("Book added to group collection");
+      },
+      onError: () => {
+        toast.error("Failed to add book to group collection");
+      },
+    });
+
+  return addBookToGroupCollectionById;
+};
+
+export const useAddBookToGroupCollectionByCollectionId = () => {
+  const addBookToGroupCollectionByCollectionId =
+    api.group_collections.addBookToGroupCollectionByCollectionId.useMutation({
+      onSuccess: () => {
+        toast.success("Book added to group collection");
+      },
+      onError: () => {
+        toast.error("Failed to add book to group collection");
+      },
+    });
+
+  return addBookToGroupCollectionByCollectionId;
+};
+
+export const useCreateGroup = () => {
+  const router = useRouter();
+
+  const createGroup = api.group.addGroup.useMutation({
+    onSuccess: () => {
+      toast.success("Group created");
+      void router.push("/groups");
+    },
+    onError: () => {
+      toast.error("Failed to create group");
+    },
+  });
+
+  return createGroup;
+};
+
+export const useCreateGroupCollection = () => {
+  const createGroupCollection =
+    api.group_collections.addGroupCollection.useMutation({
+      onSuccess: () => {
+        toast.success("Collection created");
+      },
+      onError: () => {
+        toast.error("Failed to create collection");
+      },
+    });
+
+  return createGroupCollection;
+};
+
+export const useDeleteBookFromGroupCollection = () => {
+  const deleteBookFromGroupCollection =
+    api.group_collections.deleteBookFromGroupCollection.useMutation({
+      onSuccess: () => {
+        toast.success("Book deleted from group collection");
+      },
+      onError: () => {
+        toast.error("Failed to delete book from group collection");
+      },
+    });
+
+  return deleteBookFromGroupCollection;
+};
+
+export const useDeleteGroupBook = () => {
+  const deleteGroupBook = api.group_books.deleteGroupBook.useMutation({
+    onSuccess: () => {
+      toast.success("Book deleted from group");
+    },
+    onError: () => {
+      toast.error("Failed to delete book from group");
+    },
+  });
+
+  return deleteGroupBook;
+};
+
+export const useDeleteGroupCollection = () => {
+  const deleteGroupCollection =
+    api.group_collections.deleteGroupCollection.useMutation({
+      onSuccess: () => {
+        toast.success("Collection deleted");
+      },
+      onError: () => {
+        toast.error("Failed to delete collection");
+      },
+    });
+
+  return deleteGroupCollection;
+};
+
+export const useDeleteGroup = () => {
+  const router = useRouter();
+
+  const deleteGroup = api.group.deleteGroup.useMutation({
+    onSuccess: () => {
+      toast.success("Group deleted");
+      void router.push("/groups");
+    },
+    onError: () => {
+      toast.error("Failed to delete group");
+    },
+  });
+
+  return deleteGroup;
+};
+
+export const useUpdateGroupBook = () => {
+  const updateGroupBook = api.group_books.updateGroupBook.useMutation({
+    onSuccess: () => {
+      toast.success("Book updated");
+    },
+    onError: () => {
+      toast.error("Failed to update book");
+    },
+  });
+
+  return updateGroupBook;
 };
